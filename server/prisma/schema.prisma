@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model buildings {
+  id            String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String?                  @db.VarChar(255)
+  building_type String?                  @db.VarChar(100)
+  floors        Int?
+  geom          Unsupported("geometry")?
+
+  @@index([geom], type: Gist)
+}
+
+model incidents {
+  id          String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String?                  @db.VarChar(255)
+  severity    String?                  @db.VarChar(50)
+  description String?
+  created_at  DateTime?                @default(now()) @db.Timestamp(6)
+  geom        Unsupported("geometry")?
+
+  @@index([geom], type: Gist)
+}
+
+model roads {
+  id        String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String?                  @db.VarChar(255)
+  road_type String?                  @db.VarChar(100)
+  geom      Unsupported("geometry")?
+
+  @@index([geom], type: Gist)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model utilities {
+  id         String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  asset_name String?                  @db.VarChar(255)
+  asset_type String?                  @db.VarChar(100)
+  status     String?                  @db.VarChar(50)
+  geom       Unsupported("geometry")?
+
+  @@index([geom], type: Gist)
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(RESEARCHER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  assets       Asset[]
+}
+
+model Asset {
+  id          String      @id @default(uuid())
+  name        String
+  assetType   String
+  description String?
+  latitude    Float
+  longitude   Float
+  status      AssetStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  ENGINEER
+  PLANNER
+  RESEARCHER
+}
+
+enum AssetStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
