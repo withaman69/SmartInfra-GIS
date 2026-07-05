@@ -27,4 +27,26 @@ export class AssetService {
       },
     });
   }
+
+  static async getById(id: string) {
+    return prisma.asset.findUnique({
+      where: { id },
+    });
+  }
+
+  static async update(
+    id: string,
+    data: any
+  ) {
+    return prisma.asset.update({
+      where: { id },
+      data,
+    });
+  }
+
+  static async delete(id: string) {
+    return prisma.asset.delete({
+      where: { id },
+    });
+  }
 }

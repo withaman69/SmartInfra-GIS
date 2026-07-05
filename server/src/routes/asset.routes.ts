@@ -16,4 +16,23 @@ router.get(
   AssetController.getAll
 );
 
+router.get(
+  "/:id",
+  authenticate,
+  AssetController.getById
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  AssetController.update
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  AssetController.delete
+);
+
+
 export default router;
