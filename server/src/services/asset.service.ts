@@ -72,4 +72,84 @@ export class AssetService {
     })),
   };
 }
+static async getStats() {
+  const total =
+    await prisma.asset.count();
+
+  const active =
+    await prisma.asset.count({
+      where: {
+        status: "ACTIVE",
+      },
+    });
+
+  const maintenance =
+    await prisma.asset.count({
+      where: {
+        status: "MAINTENANCE",
+      },
+    });
+
+  return {
+    total,
+    active,
+    maintenance,
+  };
+}
+static async getNearby(
+  latitude: number,
+  longitude: number,
+  radiusKm: number
+) {
+  const assets =
+    await prisma.asset.findMany();
+
+  return assets.filter((asset) => {
+    const distance =
+      Math.sqrt(
+        Math.pow(
+          asset.latitude - latitude,
+          2
+        ) +
+        Math.pow(
+          asset.longitude - longitude,
+          2
+        )
+      );
+
+    return (
+      distance <
+      radiusKm / 111
+    );
+  });
+}
+static async getGeoJsonByStatus(
+  status: string
+) {
+  const assets =
+    await prisma.asset.findMany({
+      where: { status: status as any },
+    });
+
+  return {
+    type: "FeatureCollection",
+    features: assets.map(
+      (asset) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [
+            asset.longitude,
+            asset.latitude,
+          ],
+        },
+        properties: {
+          id: asset.id,
+          name: asset.name,
+          status: asset.status,
+        },
+      })
+    ),
+  };
+}
 }

@@ -5,7 +5,7 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import assetRoutes from "./routes/asset.routes";
-
+import { errorHandler } from "./middlewares/error.middleware";
 const app = express();
 
 app.use(cors());
@@ -28,4 +28,5 @@ app.get("/", (_req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/assets", assetRoutes);
+app.use(errorHandler);
 export default app;

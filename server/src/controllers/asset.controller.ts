@@ -129,4 +129,57 @@ export class AssetController {
     });
   }
 }
+static async stats(
+  _req: Request,
+  res: Response
+) {
+  const stats =
+    await AssetService.getStats();
+
+  res.status(200).json({
+    success: true,
+    stats,
+  });
+}
+static async nearby(
+  req: Request,
+  res: Response
+) {
+  const latitude = Number(
+    req.query.latitude
+  );
+
+  const longitude = Number(
+    req.query.longitude
+  );
+
+  const radius = Number(
+    req.query.radius
+  );
+
+  const assets =
+    await AssetService.getNearby(
+      latitude,
+      longitude,
+      radius
+    );
+
+  res.status(200).json({
+    success: true,
+    assets,
+  });
+}
+static async geoJsonByStatus(
+  req: Request,
+  res: Response
+) {
+  const status = String(req.params.status);
+
+  const data =
+    await AssetService.getGeoJsonByStatus(
+      status
+    );
+
+  res.status(200).json(data);
+}
 }
