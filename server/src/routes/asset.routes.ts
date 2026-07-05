@@ -15,7 +15,11 @@ router.get(
   authenticate,
   AssetController.getAll
 );
-
+router.get(
+  "/geojson",
+  authenticate,
+  AssetController.geoJson
+);
 router.get(
   "/:id",
   authenticate,

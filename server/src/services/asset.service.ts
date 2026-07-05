@@ -49,4 +49,27 @@ export class AssetService {
       where: { id },
     });
   }
+  static async getGeoJson() {
+  const assets = await prisma.asset.findMany();
+
+  return {
+    type: "FeatureCollection",
+    features: assets.map((asset) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [
+          asset.longitude,
+          asset.latitude,
+        ],
+      },
+      properties: {
+        id: asset.id,
+        name: asset.name,
+        assetType: asset.assetType,
+        status: asset.status,
+      },
+    })),
+  };
+}
 }

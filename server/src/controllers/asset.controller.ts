@@ -113,4 +113,20 @@ export class AssetController {
       });
     }
   }
+  static async geoJson(
+  _req: Request,
+  res: Response
+) {
+  try {
+    const geoJson =
+      await AssetService.getGeoJson();
+
+    res.status(200).json(geoJson);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
 }
