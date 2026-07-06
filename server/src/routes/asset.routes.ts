@@ -11,7 +11,8 @@ router.post(
   authenticate,
   authorize(
     "ADMIN",
-    "ENGINEER"
+    "ENGINEER",
+    "RESEARCHER"
   ),
   validate(createAssetSchema),
   AssetController.create
