@@ -34,6 +34,11 @@ router.get(
   AssetController.geoJsonByStatus
 );
 router.get(
+  "/charts",
+  authenticate,
+  AssetController.chartData
+);
+router.get(
   "/stats",
   authenticate,
   AssetController.stats

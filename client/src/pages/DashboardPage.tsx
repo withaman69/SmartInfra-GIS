@@ -1,58 +1,220 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+
+const COLORS = [
+  "#22c55e",
+  "#eab308",
+  "#ef4444",
+];
 
 function DashboardPage() {
-  const [stats, setStats] =
-    useState<any>(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    maintenance: 0,
+    inactive: 0,
+  });
+
+  const [statusData, setStatusData] =
+    useState<any[]>([]);
+    const [typeData, setTypeData] =
+  useState<any[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
         const token =
-          localStorage.getItem("token");
+          localStorage.getItem(
+            "token"
+          );
 
-        const res = await api.get(
-          "/assets/stats",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const statsRes =
+          await api.get(
+            "/assets/stats",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+        const chartRes =
+          await api.get(
+            "/assets/charts",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+        setStats({
+  total:
+    statsRes.data.stats
+      ?.total || 0,
+  active:
+    statsRes.data.stats
+      ?.active || 0,
+  maintenance:
+    statsRes.data.stats
+      ?.maintenance || 0,
+  inactive:
+    statsRes.data.stats
+      ?.inactive || 0,
+});
+
+        setStatusData(
+          chartRes.data.statusData
         );
 
-        setStats(res.data.stats);
+        setTypeData(
+          chartRes.data.typeData
+        );
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
-  if (!stats)
-    return <h2>Loading...</h2>;
-
   return (
-    <div>
-      <h1>SmartInfra Dashboard</h1>
+    <div className="space-y-8">
+      <h1 className="text-4xl font-bold">
+        Dashboard
+      </h1>
 
-      <h2>
-        Total Assets:
-        {" "}
-        {stats.total}
-      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <h2 className="text-gray-500">
+            Total Assets
+          </h2>
 
-      <h2>
-        Active Assets:
-        {" "}
-        {stats.active}
-      </h2>
+          <p className="text-3xl font-bold">
+            {stats.total}
+          </p>
+        </div>
 
-      <h2>
-        Maintenance Assets:
-        {" "}
-        {stats.maintenance}
-      </h2>
+        <div className="bg-green-100 p-6 rounded-xl shadow-md">
+          <h2 className="text-green-700">
+            Active
+          </h2>
+
+          <p className="text-3xl font-bold">
+            {stats.active}
+          </p>
+        </div>
+
+        <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
+          <h2 className="text-yellow-700">
+            Maintenance
+          </h2>
+
+          <p className="text-3xl font-bold">
+            {stats.maintenance}
+          </p>
+        </div>
+
+        <div className="bg-red-100 p-6 rounded-xl shadow-md">
+          <h2 className="text-red-700">
+            Inactive
+          </h2>
+
+          <p className="text-3xl font-bold">
+            {stats.inactive}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-4">
+          Assets by Status
+        </h2>
+
+        <div className="h-[400px]">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+          >
+            <PieChart>
+              <Pie
+                data={statusData}
+                dataKey="count"
+                nameKey="status"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                label
+              >
+                {statusData.map(
+                  (_, index) => (
+                    <Cell
+                      key={index}
+                      fill={
+                        COLORS[
+                          index %
+                            COLORS.length
+                        ]
+                      }
+                    />
+                  )
+                )}
+              </Pie>
+
+              <Tooltip />
+              <Legend />
+            </PieChart>
+            <div className="bg-white p-6 rounded-xl shadow-md">
+  <h2 className="text-2xl font-bold mb-4">
+    Assets by Type
+  </h2>
+
+  <div className="h-[400px]">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <BarChart
+        data={typeData}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+
+        <XAxis
+          dataKey="assetType"
+        />
+
+        <YAxis />
+
+        <Tooltip />
+
+        <Legend />
+
+        <Bar
+          dataKey="count"
+          fill="#3b82f6"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AssetService } from "../services/asset.service";
-
+import { PrismaClient } from "@prisma/client";
 export class AssetController {
   static async create(
     req: Request,
@@ -182,4 +182,78 @@ static async geoJsonByStatus(
 
   res.status(200).json(data);
 }
+
+static async chartData(
+  req: Request,
+  res: Response
+) {
+  try {
+    const assets =
+      await AssetService.getAll();
+
+    const statusData = [
+      {
+        status: "ACTIVE",
+        count: assets.filter(
+          (asset) =>
+            asset.status ===
+            "ACTIVE"
+        ).length,
+      },
+      {
+        status: "MAINTENANCE",
+        count: assets.filter(
+          (asset) =>
+            asset.status ===
+            "MAINTENANCE"
+        ).length,
+      },
+      {
+        status: "INACTIVE",
+        count: assets.filter(
+          (asset) =>
+            asset.status ===
+            "INACTIVE"
+        ).length,
+      },
+    ];
+
+    const typeMap = new Map<
+      string,
+      number
+    >();
+
+    assets.forEach((asset) => {
+      typeMap.set(
+        asset.assetType,
+        (typeMap.get(
+          asset.assetType
+        ) || 0) + 1
+      );
+    });
+
+    const typeData =
+      Array.from(
+        typeMap.entries()
+      ).map(
+        ([assetType, count]) => ({
+          assetType,
+          count,
+        })
+      );
+
+    return res.status(200).json({
+      success: true,
+      statusData,
+      typeData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch chart data",
+    });
+  }
+}
+
 }
