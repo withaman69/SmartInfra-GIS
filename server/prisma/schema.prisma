@@ -75,6 +75,7 @@ model Asset {
   latitude    Float
   longitude   Float
   status      AssetStatus @default(ACTIVE)
+  imageUrl    String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   createdById String

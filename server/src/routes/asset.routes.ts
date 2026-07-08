@@ -4,8 +4,38 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { createAssetSchema } from "../validators/asset.validator";
 import { authorize } from "../middlewares/role.middleware";
-const router = Router();
+import { upload } from "../middlewares/upload.middleware";
 
+import cloudinary from "../config/cloudinary";
+
+const router = Router();
+router.get(
+  "/aman-test-999",
+  async (_req, res) => {
+    try {
+      const result =
+        await cloudinary.api.ping();
+
+      console.log(
+        "PING RESULT:",
+        result
+      );
+
+      return res.json(
+        result
+      );
+    } catch (error) {
+      console.error(
+        "PING ERROR:",
+        error
+      );
+
+      return res
+        .status(500)
+        .json(error);
+    }
+  }
+);
 router.post(
   "/",
   authenticate,
@@ -65,6 +95,37 @@ router.delete(
   authenticate,
   AssetController.delete
 );
+
+router.post(
+  "/upload-image",
+  authenticate,
+  upload.single("image"),
+  AssetController.uploadImage
+);
+router.get(
+  "/cloudinary-test",
+  async (_req, res) => {
+    try {
+      const result =
+        await cloudinary.api.ping();
+
+      console.log(
+        "Cloudinary Ping:",
+        result
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error(
+        "Cloudinary Ping Error:",
+        error
+      );
+
+      res.status(500).json(error);
+    }
+  }
+);
+
 
 
 export default router;

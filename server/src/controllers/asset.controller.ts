@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { AssetService } from "../services/asset.service";
 import { PrismaClient } from "@prisma/client";
+import cloudinary from "../config/cloudinary";
+import multer from "multer";
 export class AssetController {
   static async create(
     req: Request,
@@ -254,6 +256,93 @@ static async chartData(
         "Failed to fetch chart data",
     });
   }
+}
+static async uploadImage(
+  req: Request & {
+    file?: Express.Multer.File;
+  },
+  res: Response
+) {
+  try {
+    if (!req.file) {
+  return res.status(400).json({
+    success: false,
+    message: "No image uploaded",
+  });
+}
+console.log(
+  "REQ FILE:",
+  req.file
+);
+const file = req.file;
+
+console.log(
+  "File:",
+  file.originalname
+);
+
+console.log(
+  "Size:",
+  file.size
+);
+console.log(
+  "Cloud:",
+  process.env.CLOUDINARY_CLOUD_NAME
+);
+
+console.log(
+  "Cloudinary Config:",
+  cloudinary.config()
+);
+
+const result =
+  await cloudinary.uploader.upload(
+    `data:${file.mimetype};base64,${file.buffer.toString(
+      "base64"
+    )}`,
+    {
+      folder:
+        "smartinfra-assets",
+    }
+  );
+
+console.log(
+  "UPLOAD RESULT:",
+  result
+);
+
+    return res.json({
+      success: true,
+      imageUrl:
+        result.secure_url,
+    });
+  }catch (error: any) {
+  console.error(
+    "FULL ERROR:",
+    error
+  );
+
+  console.error(
+    "ERROR MESSAGE:",
+    error?.message
+  );
+
+  console.error(
+    "HTTP CODE:",
+    error?.http_code
+  );
+
+  console.error(
+    "ERROR RESPONSE:",
+    error?.error
+  );
+
+  return res.status(500).json({
+    success: false,
+    message: error?.message || "Upload failed",
+    error,
+  });
+}
 }
 
 }
