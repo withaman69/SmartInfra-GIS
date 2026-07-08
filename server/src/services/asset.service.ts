@@ -1,18 +1,25 @@
 import { prisma } from "../config/db";
 
+
+import {
+  AssetStatus
+} from "@prisma/client";
+
 export class AssetService {
-  static async create(data: {
-    name: string;
-    assetType: string;
-    description?: string;
-    latitude: number;
-    longitude: number;
-    createdById: string;
-  }) {
-    return prisma.asset.create({
-      data,
-    });
-  }
+static async create(data: {
+  name: string;
+  assetType: string;
+  description?: string;
+  status?: AssetStatus;
+  latitude: number;
+  longitude: number;
+  imageUrl?: string;
+  createdById: string;
+}) {
+  return prisma.asset.create({
+    data,
+  });
+}
 
   static async getAll() {
     return prisma.asset.findMany({
@@ -63,12 +70,13 @@ export class AssetService {
           asset.latitude,
         ],
       },
-      properties: {
-        id: asset.id,
-        name: asset.name,
-        assetType: asset.assetType,
-        status: asset.status,
-      },
+     properties: {
+  id: asset.id,
+  name: asset.name,
+  assetType: asset.assetType,
+  status: asset.status,
+  imageUrl: asset.imageUrl,
+},
     })),
   };
 }
@@ -143,11 +151,12 @@ static async getGeoJsonByStatus(
             asset.latitude,
           ],
         },
-        properties: {
-          id: asset.id,
-          name: asset.name,
-          status: asset.status,
-        },
+       properties: {
+  id: asset.id,
+  name: asset.name,
+  status: asset.status,
+  imageUrl: asset.imageUrl,
+},
       })
     ),
   };
