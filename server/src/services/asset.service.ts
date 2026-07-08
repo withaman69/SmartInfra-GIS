@@ -154,6 +154,7 @@ static async getGeoJsonByStatus(
        properties: {
   id: asset.id,
   name: asset.name,
+  assetType: asset.assetType,
   status: asset.status,
   imageUrl: asset.imageUrl,
 },
