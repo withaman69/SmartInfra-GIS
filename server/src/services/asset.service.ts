@@ -98,10 +98,18 @@ static async getStats() {
       },
     });
 
+  const inactive =
+    await prisma.asset.count({
+      where: {
+        status: "INACTIVE",
+      },
+    });
+
   return {
     total,
     active,
     maintenance,
+    inactive,
   };
 }
 static async getNearby(

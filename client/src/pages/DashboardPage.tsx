@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+
 import {
   PieChart,
   Pie,
@@ -7,8 +8,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import {
   BarChart,
   Bar,
   XAxis,
@@ -32,16 +31,18 @@ function DashboardPage() {
 
   const [statusData, setStatusData] =
     useState<any[]>([]);
-    const [typeData, setTypeData] =
-  useState<any[]>([]);
+
+  const [typeData, setTypeData] =
+    useState<any[]>([]);
+
+  const [recentAssets, setRecentAssets] =
+    useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token =
-          localStorage.getItem(
-            "token"
-          );
+          localStorage.getItem("token");
 
         const statsRes =
           await api.get(
@@ -63,20 +64,28 @@ function DashboardPage() {
             }
           );
 
+        const recentRes =
+          await api.get(
+            "/assets/recent",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
         setStats({
-  total:
-    statsRes.data.stats
-      ?.total || 0,
-  active:
-    statsRes.data.stats
-      ?.active || 0,
-  maintenance:
-    statsRes.data.stats
-      ?.maintenance || 0,
-  inactive:
-    statsRes.data.stats
-      ?.inactive || 0,
-});
+          total:
+            statsRes.data.stats?.total || 0,
+          active:
+            statsRes.data.stats?.active || 0,
+          maintenance:
+            statsRes.data.stats
+              ?.maintenance || 0,
+          inactive:
+            statsRes.data.stats
+              ?.inactive || 0,
+        });
 
         setStatusData(
           chartRes.data.statusData
@@ -84,6 +93,10 @@ function DashboardPage() {
 
         setTypeData(
           chartRes.data.typeData
+        );
+
+        setRecentAssets(
+          recentRes.data.assets
         );
       } catch (error) {
         console.error(error);
@@ -99,12 +112,12 @@ function DashboardPage() {
         Dashboard
       </h1>
 
+      {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h2 className="text-gray-500">
             Total Assets
           </h2>
-
           <p className="text-3xl font-bold">
             {stats.total}
           </p>
@@ -114,7 +127,6 @@ function DashboardPage() {
           <h2 className="text-green-700">
             Active
           </h2>
-
           <p className="text-3xl font-bold">
             {stats.active}
           </p>
@@ -124,7 +136,6 @@ function DashboardPage() {
           <h2 className="text-yellow-700">
             Maintenance
           </h2>
-
           <p className="text-3xl font-bold">
             {stats.maintenance}
           </p>
@@ -134,86 +145,135 @@ function DashboardPage() {
           <h2 className="text-red-700">
             Inactive
           </h2>
-
           <p className="text-3xl font-bold">
             {stats.inactive}
           </p>
         </div>
       </div>
 
+      {/* CHARTS */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <h2 className="text-2xl font-bold mb-4">
+            Assets by Status
+          </h2>
+
+          <div className="h-[400px]">
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  dataKey="count"
+                  nameKey="status"
+                  outerRadius={120}
+                  label
+                >
+                  {statusData.map(
+                    (_, index) => (
+                      <Cell
+                        key={index}
+                        fill={
+                          COLORS[
+                            index %
+                              COLORS.length
+                          ]
+                        }
+                      />
+                    )
+                  )}
+                </Pie>
+
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <h2 className="text-2xl font-bold mb-4">
+            Assets by Type
+          </h2>
+
+          <div className="h-[400px]">
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+              <BarChart
+                data={typeData}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+
+                <XAxis
+                  dataKey="assetType"
+                />
+
+                <YAxis />
+
+                <Tooltip />
+
+                <Legend />
+
+                <Bar
+                  dataKey="count"
+                  fill="#3b82f6"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* RECENT ASSETS */}
       <div className="bg-white p-6 rounded-xl shadow-md">
         <h2 className="text-2xl font-bold mb-4">
-          Assets by Status
+          Recent Assets
         </h2>
 
-        <div className="h-[400px]">
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
-            <PieChart>
-              <Pie
-                data={statusData}
-                dataKey="count"
-                nameKey="status"
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                label
-              >
-                {statusData.map(
-                  (_, index) => (
-                    <Cell
-                      key={index}
-                      fill={
-                        COLORS[
-                          index %
-                            COLORS.length
-                        ]
-                      }
-                    />
-                  )
-                )}
-              </Pie>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="text-left p-3">
+                Name
+              </th>
 
-              <Tooltip />
-              <Legend />
-            </PieChart>
-            <div className="bg-white p-6 rounded-xl shadow-md">
-  <h2 className="text-2xl font-bold mb-4">
-    Assets by Type
-  </h2>
+              <th className="text-left p-3">
+                Type
+              </th>
 
-  <div className="h-[400px]">
-    <ResponsiveContainer
-      width="100%"
-      height="100%"
-    >
-      <BarChart
-        data={typeData}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
+              <th className="text-left p-3">
+                Status
+              </th>
+            </tr>
+          </thead>
 
-        <XAxis
-          dataKey="assetType"
-        />
+          <tbody>
+            {recentAssets.map(
+              (asset) => (
+                <tr
+                  key={asset.id}
+                  className="border-b hover:bg-slate-50"
+                >
+                  <td className="p-3">
+                    {asset.name}
+                  </td>
 
-        <YAxis />
+                  <td className="p-3">
+                    {asset.assetType}
+                  </td>
 
-        <Tooltip />
-
-        <Legend />
-
-        <Bar
-          dataKey="count"
-          fill="#3b82f6"
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  </div>
-</div>
-          </ResponsiveContainer>
-        </div>
+                  <td className="p-3">
+                    {asset.status}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

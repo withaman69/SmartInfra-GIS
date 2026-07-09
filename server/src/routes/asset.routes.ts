@@ -79,6 +79,11 @@ router.get(
   AssetController.nearby
 );
 router.get(
+  "/recent",
+  authenticate,
+  AssetController.recentAssets
+);
+router.get(
   "/:id",
   authenticate,
   AssetController.getById

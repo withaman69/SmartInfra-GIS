@@ -47,6 +47,9 @@ function MainLayout() {
           <Link to="/nearby-assets">
   Nearby Assets
 </Link>
+<Link to="/tickets">
+  Tickets
+</Link>
          <button
   onClick={() => {
     localStorage.removeItem(

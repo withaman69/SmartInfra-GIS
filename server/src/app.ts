@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import assetRoutes from "./routes/asset.routes";
 import { errorHandler } from "./middlewares/error.middleware";
+import ticketRoutes from "./routes/ticket.routes";
+import userRoutes from "./routes/user.routes";
 const app = express();
 
 app.use(cors());
@@ -29,4 +31,6 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/assets", assetRoutes);
 app.use(errorHandler);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/users", userRoutes);
 export default app;

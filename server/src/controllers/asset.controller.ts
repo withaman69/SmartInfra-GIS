@@ -345,4 +345,27 @@ console.log(
 }
 }
 
+static async recentAssets(
+  req: Request,
+  res: Response
+) {
+  try {
+    const assets =
+      await prisma.asset.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 5,
+      });
+
+    return res.json({
+      success: true,
+      assets,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+    });
+  }
+}
 }

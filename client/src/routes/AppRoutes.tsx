@@ -14,6 +14,10 @@ import ProtectedRoute from "./ProtectedRoute";
 import AssetDetailsPage from "../pages/AssetDetailsPage";
 import EditAssetPage from "../pages/EditAssetPage";
 import NearbyAssetsPage from "../pages/NearbyAssetsPage";
+import RegisterPage from "../pages/RegisterPage";
+import TicketsPage from "../pages/TicketsPage";
+import TicketDashboardPage
+from "../pages/TicketDashboardPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -22,10 +26,14 @@ function AppRoutes() {
           path="/"
           element={<LoginPage />}
         />
-
+<Route
+  path="/login"
+  element={<LoginPage />}
+/>
         <Route
   element={<MainLayout />}
 >
+  
   <Route
     path="/dashboard"
     element={
@@ -78,6 +86,26 @@ function AppRoutes() {
   element={<NearbyAssetsPage />}
 />
 </Route>
+<Route
+  path="/tickets"
+  element={
+    <ProtectedRoute>
+      <TicketsPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/register"
+  element={<RegisterPage />}
+/>
+<Route
+  path="/ticket-dashboard"
+  element={
+    <ProtectedRoute>
+      <TicketDashboardPage />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );

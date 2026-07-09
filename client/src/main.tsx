@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import "leaflet/dist/leaflet.css";
 import App from './App.tsx'
-
+import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
+import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

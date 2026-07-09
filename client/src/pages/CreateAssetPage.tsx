@@ -1,7 +1,6 @@
 import { useState } from "react";
 import api from "../api/axios";
 
-
 function CreateAssetPage() {
   const [form, setForm] = useState({
     name: "",
@@ -12,6 +11,52 @@ function CreateAssetPage() {
     longitude: "",
   });
 
+  const [image, setImage] =
+    useState<File | null>(null);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  const uploadImage =
+    async (): Promise<string> => {
+      if (!image) return "";
+
+      try {
+        setUploading(true);
+
+        const token =
+          localStorage.getItem("token");
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "image",
+          image
+        );
+
+        const res =
+          await api.post(
+            "/assets/upload-image",
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type":
+                  "multipart/form-data",
+              },
+            }
+          );
+
+        return res.data.imageUrl;
+      } catch (error) {
+        console.error(error);
+        return "";
+      } finally {
+        setUploading(false);
+      }
+    };
+
   const handleSubmit = async (
     e: React.FormEvent
   ) => {
@@ -21,10 +66,14 @@ function CreateAssetPage() {
       const token =
         localStorage.getItem("token");
 
+      const imageUrl =
+        await uploadImage();
+
       await api.post(
         "/assets",
         {
           ...form,
+          imageUrl,
           latitude: Number(
             form.latitude
           ),
@@ -51,8 +100,11 @@ function CreateAssetPage() {
         latitude: "",
         longitude: "",
       });
+
+      setImage(null);
     } catch (error) {
       console.error(error);
+      alert("Failed to create asset");
     }
   };
 
@@ -128,6 +180,34 @@ function CreateAssetPage() {
           </option>
         </select>
 
+        <div>
+          <label className="block mb-2 font-medium">
+            Asset Image
+          </label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setImage(
+                e.target.files?.[0] ||
+                  null
+              )
+            }
+            className="w-full border rounded p-3"
+          />
+        </div>
+
+        {image && (
+          <img
+            src={URL.createObjectURL(
+              image
+            )}
+            alt="Preview"
+            className="w-40 h-40 object-cover rounded border"
+          />
+        )}
+
         <input
           className="w-full border rounded p-3"
           placeholder="Latitude"
@@ -156,9 +236,12 @@ function CreateAssetPage() {
 
         <button
           type="submit"
-          className="bg-slate-900 text-white px-6 py-3 rounded hover:bg-slate-700"
+          disabled={uploading}
+          className="bg-slate-900 text-white px-6 py-3 rounded hover:bg-slate-700 disabled:bg-slate-500"
         >
-          Create Asset
+          {uploading
+            ? "Uploading..."
+            : "Create Asset"}
         </button>
       </form>
     </div>
