@@ -170,4 +170,13 @@ static async getGeoJsonByStatus(
     ),
   };
 }
+static async getRecentAssets() {
+  return prisma.asset.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 5,
+  });
+}
+
 }

@@ -8,6 +8,7 @@ import assetRoutes from "./routes/asset.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import ticketRoutes from "./routes/ticket.routes";
 import userRoutes from "./routes/user.routes";
+import activityRoutes from "./routes/activity.routes";
 const app = express();
 
 app.use(cors());
@@ -33,4 +34,8 @@ app.use("/api/assets", assetRoutes);
 app.use(errorHandler);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/users", userRoutes);
+app.use(
+  "/api/activity",
+  activityRoutes
+);
 export default app;

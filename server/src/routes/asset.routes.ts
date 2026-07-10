@@ -78,10 +78,11 @@ router.get(
   authenticate,
   AssetController.nearby
 );
+
 router.get(
   "/recent",
   authenticate,
-  AssetController.recentAssets
+  AssetController.recent
 );
 router.get(
   "/:id",
@@ -92,12 +93,17 @@ router.get(
 router.put(
   "/:id",
   authenticate,
+  authorize(
+    "ADMIN",
+    "ENGINEER"
+  ),
   AssetController.update
 );
 
 router.delete(
   "/:id",
   authenticate,
+  authorize("ADMIN"),
   AssetController.delete
 );
 

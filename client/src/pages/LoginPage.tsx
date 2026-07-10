@@ -27,9 +27,14 @@ function LoginPage() {
           }
         );
 
-     localStorage.setItem(
+    localStorage.setItem(
   "token",
   res.data.token
+);
+
+localStorage.setItem(
+  "user",
+  JSON.stringify(res.data.user)
 );
 
 console.log("Login Successful");

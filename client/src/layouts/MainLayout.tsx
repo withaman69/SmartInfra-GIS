@@ -2,76 +2,127 @@ import {
   Link,
   Outlet,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
+
+import {
+  FiHome,
+  FiMap,
+  FiDatabase,
+  FiPlusCircle,
+  FiTool,
+  FiSearch,
+  FiLogOut,
+} from "react-icons/fi";
+
 function MainLayout() {
-     const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+const user = JSON.parse(
+  localStorage.getItem("user") || "{}"
+);
+console.log("Current User:", user);
+ const menuItems = [
+  {
+    name: "Dashboard",
+    path: "/dashboard",
+    icon: <FiHome />,
+  },
+
+  {
+    name: "Assets",
+    path: "/assets",
+    icon: <FiDatabase />,
+  },
+
+  {
+    name: "GIS Map",
+    path: "/map",
+    icon: <FiMap />,
+  },
+
+  ...(user.role === "ADMIN"
+    ? [
+        {
+          name: "Create Asset",
+          path: "/create-asset",
+          icon: <FiPlusCircle />,
+        },
+      ]
+    : []),
+
+  {
+    name: "Nearby Assets",
+    path: "/nearby-assets",
+    icon: <FiSearch />,
+  },
+
+  {
+    name: "Tickets",
+    path: "/tickets",
+    icon: <FiTool />,
+  },
+];
+
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-      }}
-    >
-      <aside
-        style={{
-          width: "220px",
-          padding: "20px",
-          borderRight:
-            "1px solid #ddd",
-        }}
-      >
-        <h2>SmartInfra</h2>
+    <div className="flex min-h-screen bg-stone-50">
 
-        <nav
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-          }}
-        >
-          <Link to="/dashboard">
-            Dashboard
-          </Link>
+      {/* Sidebar */}
+      <aside className="w-64 bg-slate-900 text-white flex flex-col">
 
-          <Link to="/assets">
-            Assets
-          </Link>
+        <div className="p-6 border-b border-slate-800">
+          <h1 className="text-2xl font-bold">
+            SmartInfra GIS
+          </h1>
 
-          <Link to="/map">
-            GIS Map
-          </Link>
+          <p className="text-slate-400 text-sm mt-1">
+            Infrastructure Platform
+          </p>
+        </div>
 
-          <Link to="/create-asset">
-            Create Asset
-          </Link>
-          <Link to="/nearby-assets">
-  Nearby Assets
-</Link>
-<Link to="/tickets">
-  Tickets
-</Link>
-         <button
-  onClick={() => {
-    localStorage.removeItem(
-      "token"
-    );
+        <nav className="flex-1 p-4 space-y-2">
 
-    navigate("/");
-  }}
->
-  Logout
-</button>
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                location.pathname === item.path
+                  ? "bg-white text-slate-900 font-semibold"
+                  : "hover:bg-slate-800"
+              }`}
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          ))}
+
         </nav>
+
+        <div className="p-4 border-t border-slate-800">
+
+          <button
+            onClick={() => {
+              localStorage.removeItem(
+                "token"
+              );
+
+              navigate("/");
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800"
+          >
+            <FiLogOut />
+            Logout
+          </button>
+
+        </div>
       </aside>
 
-      <main
-        style={{
-          flex: 1,
-          padding: "20px",
-        }}
-      >
+      {/* Main Content */}
+      <main className="flex-1 p-8">
         <Outlet />
       </main>
+
     </div>
   );
 }

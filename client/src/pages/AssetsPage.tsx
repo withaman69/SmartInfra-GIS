@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
+
 interface Asset {
   id: string;
   name: string;
@@ -20,7 +21,35 @@ function AssetsPage() {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+  const user = JSON.parse(
+  localStorage.getItem("user") || "{}"
+);
 
+const handleDelete = async (
+  id: string
+) => {
+  try {
+    const token =
+      localStorage.getItem("token");
+
+    await api.delete(
+      `/assets/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setAssets((prev) =>
+      prev.filter(
+        (asset) => asset.id !== id
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
   useEffect(() => {
     const fetchAssets = async () => {
       try {
@@ -43,25 +72,7 @@ function AssetsPage() {
     fetchAssets();
   }, []);
 
-  const deleteAsset = async (id: string) => {
-    const confirmed = window.confirm("Delete this asset?");
-
-    if (!confirmed) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      await api.delete(`/assets/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setAssets(assets.filter((asset) => asset.id !== id));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+ 
 
   if (loading) {
     return (
@@ -99,84 +110,127 @@ function AssetsPage() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">Assets</h1>
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h1 className="text-4xl font-bold">
+        Assets
+      </h1>
+
+      <div className="flex gap-2">
+
+        {(user?.role === "ADMIN" ||
+          user?.role === "ENGINEER") && (
+          <button
+            onClick={() =>
+              navigate("/create-asset")
+            }
+            className="bg-slate-900 text-white px-4 py-2 rounded"
+          >
+            Create Asset
+          </button>
+        )}
+
         <button
           onClick={exportCSV}
           className="bg-green-600 text-white px-4 py-2 rounded"
         >
           Export CSV
         </button>
+
       </div>
+    </div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search assets..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-96 border rounded-lg p-3"
-        />
+    <div className="mb-4">
+      <input
+        type="text"
+        placeholder="Search assets..."
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        className="w-full md:w-96 border rounded-lg p-3"
+      />
+    </div>
+
+    <div className="flex gap-3 mb-6">
+      <button
+        onClick={() => setFilter("ALL")}
+        className="bg-slate-900 text-white px-4 py-2 rounded"
+      >
+        All
+      </button>
+
+      <button
+        onClick={() => setFilter("ACTIVE")}
+        className="bg-green-600 text-white px-4 py-2 rounded"
+      >
+        Active
+      </button>
+
+      <button
+        onClick={() =>
+          setFilter("MAINTENANCE")
+        }
+        className="bg-yellow-500 text-white px-4 py-2 rounded"
+      >
+        Maintenance
+      </button>
+
+      <button
+        onClick={() =>
+          setFilter("INACTIVE")
+        }
+        className="bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Inactive
+      </button>
+    </div>
+
+    {filteredAssets.length === 0 ? (
+      <div className="bg-white rounded-xl shadow-md p-10 text-center">
+        <h2 className="text-2xl font-bold">
+          No Assets Found
+        </h2>
+
+        <p className="text-gray-500 mt-2">
+          Create your first asset or
+          adjust filters.
+        </p>
       </div>
+    ) : (
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="text-left p-4">
+                Image
+              </th>
 
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setFilter("ALL")}
-          className="bg-slate-900 text-white px-4 py-2 rounded"
-        >
-          All
-        </button>
+              <th className="text-left p-4">
+                Name
+              </th>
 
-        <button
-          onClick={() => setFilter("ACTIVE")}
-          className="bg-green-600 text-white px-4 py-2 rounded"
-        >
-          Active
-        </button>
+              <th className="text-left p-4">
+                Asset Type
+              </th>
 
-        <button
-          onClick={() => setFilter("MAINTENANCE")}
-          className="bg-yellow-500 text-white px-4 py-2 rounded"
-        >
-          Maintenance
-        </button>
+              <th className="text-left p-4">
+                Status
+              </th>
 
-        <button
-          onClick={() => setFilter("INACTIVE")}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Inactive
-        </button>
-      </div>
+              <th className="text-left p-4">
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-      {filteredAssets.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-10 text-center">
-          <h2 className="text-2xl font-bold">No Assets Found</h2>
-
-          <p className="text-gray-500 mt-2">
-            Create your first asset or adjust filters.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="text-left p-4">Image</th>
-                <th className="text-left p-4">Name</th>
-
-                <th className="text-left p-4">Asset Type</th>
-
-                <th className="text-left p-4">Status</th>
-
-                <th className="text-left p-4">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredAssets.map((asset) => (
-                <tr key={asset.id} className="border-t hover:bg-slate-50">
+          <tbody>
+            {filteredAssets.map(
+              (asset) => (
+                <tr
+                  key={asset.id}
+                  className="border-t hover:bg-slate-50"
+                >
                   <td className="p-4">
                     {asset.imageUrl ? (
                       <img
@@ -185,19 +239,28 @@ function AssetsPage() {
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     ) : (
-                      <span>No Image</span>
+                      <span>
+                        No Image
+                      </span>
                     )}
                   </td>
-                  <td className="p-4 font-medium">{asset.name}</td>
 
-                  <td className="p-4">{asset.assetType}</td>
+                  <td className="p-4 font-medium">
+                    {asset.name}
+                  </td>
+
+                  <td className="p-4">
+                    {asset.assetType}
+                  </td>
 
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        asset.status === "ACTIVE"
+                        asset.status ===
+                        "ACTIVE"
                           ? "bg-green-100 text-green-700"
-                          : asset.status === "MAINTENANCE"
+                          : asset.status ===
+                              "MAINTENANCE"
                             ? "bg-yellow-100 text-yellow-700"
                             : "bg-red-100 text-red-700"
                       }`}
@@ -207,37 +270,56 @@ function AssetsPage() {
                   </td>
 
                   <td className="p-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/assets/${asset.id}`)}
-                        className="bg-slate-900 text-white px-3 py-1 rounded hover:bg-slate-700"
-                      >
-                        View
-                      </button>
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/assets/${asset.id}`
+                        )
+                      }
+                      className="bg-slate-900 text-white px-3 py-1 rounded"
+                    >
+                      View
+                    </button>
 
+                    {(user?.role ===
+                      "ADMIN" ||
+                      user?.role ===
+                        "ENGINEER") && (
                       <button
-                        onClick={() => navigate(`/edit-asset/${asset.id}`)}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                        onClick={() =>
+                          navigate(
+                            `/edit-asset/${asset.id}`
+                          )
+                        }
+                        className="bg-yellow-500 text-white px-3 py-1 rounded ml-2"
                       >
                         Edit
                       </button>
+                    )}
 
+                    {user?.role ===
+                      "ADMIN" && (
                       <button
-                        onClick={() => deleteAsset(asset.id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        onClick={() =>
+                          handleDelete(
+                            asset.id
+                          )
+                        }
+                        className="bg-red-500 text-white px-3 py-1 rounded ml-2"
                       >
                         Delete
                       </button>
-                    </div>
+                    )}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+);
 }
 
 export default AssetsPage;

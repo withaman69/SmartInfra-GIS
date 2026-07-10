@@ -18,14 +18,20 @@ import RegisterPage from "../pages/RegisterPage";
 import TicketsPage from "../pages/TicketsPage";
 import TicketDashboardPage
 from "../pages/TicketDashboardPage";
+import LandingPage from "../pages/LandingPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={<LoginPage />}
-        />
+      <Route
+  path="/"
+  element={<LandingPage />}
+/>
+
+<Route
+  path="/login"
+  element={<LoginPage />}
+/>
 <Route
   path="/login"
   element={<LoginPage />}

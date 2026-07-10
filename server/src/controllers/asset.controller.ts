@@ -3,6 +3,7 @@ import { AssetService } from "../services/asset.service";
 import { PrismaClient } from "@prisma/client";
 import cloudinary from "../config/cloudinary";
 import multer from "multer";
+
 export class AssetController {
   static async create(
     req: Request,
@@ -345,26 +346,26 @@ console.log(
 }
 }
 
-static async recentAssets(
+
+static async recent(
   req: Request,
   res: Response
 ) {
   try {
     const assets =
-      await prisma.asset.findMany({
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5,
-      });
+      await AssetService.getRecentAssets();
 
-    return res.json({
+    res.status(200).json({
       success: true,
       assets,
     });
   } catch (error) {
-    return res.status(500).json({
+    console.error(error);
+
+    res.status(500).json({
       success: false,
+      message:
+        "Failed to fetch recent assets",
     });
   }
 }

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { TicketController } from "../controllers/ticket.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-
+import { authorize } from "../middlewares/role.middleware";
 const router = Router();
 
 router.use(authenticate);
@@ -17,13 +17,11 @@ router.get(
 );
 router.get(
   "/stats",
-  authenticate,
   TicketController.stats
 );
 
 router.get(
   "/charts",
-  authenticate,
   TicketController.charts
 );
 
@@ -45,11 +43,16 @@ router.delete(
 router.patch(
   "/:id/status",
   authenticate,
+  authorize(
+    "ADMIN",
+    "ENGINEER"
+  ),
   TicketController.updateStatus
 );
 router.patch(
   "/:id/assign",
   authenticate,
+  authorize("ADMIN"),
   TicketController.assignEngineer
 );
 

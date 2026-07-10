@@ -14,7 +14,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-
+import { useNavigate } from "react-router-dom";
 const COLORS = [
   "#22c55e",
   "#eab308",
@@ -22,6 +22,7 @@ const COLORS = [
 ];
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -37,6 +38,19 @@ function DashboardPage() {
 
   const [recentAssets, setRecentAssets] =
     useState<any[]>([]);
+    const [recentTickets, setRecentTickets] =
+  useState<any[]>([]);
+  const [activities, setActivities] =
+  useState<any[]>([]);
+  const [user, setUser] =
+  useState<any>(null);
+  const [ticketStats, setTicketStats] =
+  useState({
+    total: 0,
+    open: 0,
+    inProgress: 0,
+    resolved: 0,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +68,7 @@ function DashboardPage() {
             }
           );
 
+          
         const chartRes =
           await api.get(
             "/assets/charts",
@@ -98,6 +113,71 @@ function DashboardPage() {
         setRecentAssets(
           recentRes.data.assets
         );
+        const userRes =
+  await api.get(
+    "/auth/me",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+setUser(
+  userRes.data.user
+);
+        const ticketsRes =
+  await api.get(
+    "/tickets",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const profileRes = await api.get(
+  "/auth/profile",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+setUser(profileRes.data.user);
+  const activityRes =
+  await api.get(
+    "/activity/recent",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+setActivities(
+  activityRes.data.activities
+);
+  const ticketStatsRes =
+  await api.get(
+    "/tickets/stats",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  
+
+setRecentTickets(
+  ticketsRes.data.tickets.slice(
+    0,
+    5
+  )
+);
+setTicketStats(
+  ticketStatsRes.data.stats
+);
       } catch (error) {
         console.error(error);
       }
@@ -105,178 +185,368 @@ function DashboardPage() {
 
     fetchData();
   }, []);
+const getQuickActions = () => {
+  if (!user) return [];
 
-  return (
-    <div className="space-y-8">
-      <h1 className="text-4xl font-bold">
-        Dashboard
+  switch (user.role) {
+    case "ADMIN":
+      return [
+        {
+          title: "Create Asset",
+          path: "/create-asset",
+        },
+        {
+          title: "Manage Tickets",
+          path: "/tickets",
+        },
+        {
+          title: "GIS Map",
+          path: "/map",
+        },
+      ];
+
+    case "ENGINEER":
+      return [
+        {
+          title: "My Tickets",
+          path: "/tickets",
+        },
+        {
+          title: "GIS Map",
+          path: "/map",
+        },
+      ];
+
+    case "RESEARCHER":
+      return [
+        {
+          title: "GIS Map",
+          path: "/map",
+        },
+        {
+          title: "Nearby Assets",
+          path: "/nearby-assets",
+        },
+      ];
+
+    default:
+      return [];
+  }
+};
+ return (
+  <div className="space-y-8">
+
+    {/* HEADER */}
+    <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+      <h1 className="text-4xl font-bold text-slate-900">
+        Infrastructure Command Center
       </h1>
 
-      {/* KPI CARDS */}
+      {user && (
+        <span className="inline-block mt-3 px-4 py-1 bg-slate-100 rounded-full text-sm">
+          Role: {user.role}
+        </span>
+      )}
+
+      <p className="text-slate-600 mt-4 text-lg">
+        Monitor infrastructure assets, manage maintenance
+        operations, and visualize GIS intelligence from a
+        single platform.
+      </p>
+
+      <div className="flex gap-3 mt-6">
+        {user?.role === "ADMIN" && (
+  <button
+    onClick={() =>
+      navigate("/create-asset")
+    }
+    className="bg-slate-900 text-white px-5 py-2 rounded-lg"
+  >
+    Create Asset
+  </button>
+)}
+
+        <button
+          onClick={() => navigate("/tickets")}
+          className="border border-slate-300 px-5 py-2 rounded-lg"
+        >
+          View Tickets
+        </button>
+      </div>
+    </div>
+
+    {/* ASSET KPIs */}
+    <div>
+      <h2 className="text-2xl font-bold mb-4">
+        Asset Overview
+      </h2>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-gray-500">
+          <h3 className="text-gray-500">
             Total Assets
-          </h2>
+          </h3>
+
           <p className="text-3xl font-bold">
             {stats.total}
           </p>
         </div>
 
         <div className="bg-green-100 p-6 rounded-xl shadow-md">
-          <h2 className="text-green-700">
+          <h3 className="text-green-700">
             Active
-          </h2>
+          </h3>
+
           <p className="text-3xl font-bold">
             {stats.active}
           </p>
         </div>
 
         <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
-          <h2 className="text-yellow-700">
+          <h3 className="text-yellow-700">
             Maintenance
-          </h2>
+          </h3>
+
           <p className="text-3xl font-bold">
             {stats.maintenance}
           </p>
         </div>
 
         <div className="bg-red-100 p-6 rounded-xl shadow-md">
-          <h2 className="text-red-700">
+          <h3 className="text-red-700">
             Inactive
-          </h2>
+          </h3>
+
           <p className="text-3xl font-bold">
             {stats.inactive}
           </p>
         </div>
       </div>
+    </div>
 
-      {/* CHARTS */}
-      <div className="grid md:grid-cols-2 gap-6">
+    {/* TICKET KPIs */}
+    <div>
+      <h2 className="text-2xl font-bold mb-4">
+        Ticket Operations
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-2xl font-bold mb-4">
-            Assets by Status
-          </h2>
+          <h3 className="text-slate-500">
+            Total Tickets
+          </h3>
 
-          <div className="h-[400px]">
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  dataKey="count"
-                  nameKey="status"
-                  outerRadius={120}
-                  label
-                >
-                  {statusData.map(
-                    (_, index) => (
-                      <Cell
-                        key={index}
-                        fill={
-                          COLORS[
-                            index %
-                              COLORS.length
-                          ]
-                        }
-                      />
-                    )
-                  )}
-                </Pie>
-
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <p className="text-3xl font-bold">
+            {ticketStats.total}
+          </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-2xl font-bold mb-4">
-            Assets by Type
-          </h2>
+        <div className="bg-red-100 p-6 rounded-xl shadow-md">
+          <h3 className="text-red-700">
+            Open
+          </h3>
 
-          <div className="h-[400px]">
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-              <BarChart
-                data={typeData}
+          <p className="text-3xl font-bold">
+            {ticketStats.open}
+          </p>
+        </div>
+
+        <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
+          <h3 className="text-yellow-700">
+            In Progress
+          </h3>
+
+          <p className="text-3xl font-bold">
+            {ticketStats.inProgress}
+          </p>
+        </div>
+
+        <div className="bg-green-100 p-6 rounded-xl shadow-md">
+          <h3 className="text-green-700">
+            Resolved
+          </h3>
+
+          <p className="text-3xl font-bold">
+            {ticketStats.resolved}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div className="bg-white p-6 rounded-xl shadow-md">
+  <h2 className="text-2xl font-bold mb-4">
+    Quick Actions
+  </h2>
+
+  <div className="flex flex-wrap gap-3">
+    {getQuickActions().map(
+      (action) => (
+        <button
+          key={action.title}
+          onClick={() =>
+            navigate(action.path)
+          }
+          className="bg-slate-900 text-white px-4 py-2 rounded-lg"
+        >
+          {action.title}
+        </button>
+      )
+    )}
+  </div>
+</div>
+
+    {/* CHARTS */}
+    <div className="grid md:grid-cols-2 gap-6">
+
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-4">
+          Assets by Status
+        </h2>
+
+        <div className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={statusData}
+                dataKey="count"
+                nameKey="status"
+                outerRadius={120}
+                label
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                {statusData.map((_, index) => (
+                  <Cell
+                    key={index}
+                    fill={
+                      COLORS[index % COLORS.length]
+                    }
+                  />
+                ))}
+              </Pie>
 
-                <XAxis
-                  dataKey="assetType"
-                />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Legend />
-
-                <Bar
-                  dataKey="count"
-                  fill="#3b82f6"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* RECENT ASSETS */}
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-4">
+          Assets by Type
+        </h2>
+
+        <div className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={typeData}>
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="assetType" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Legend />
+
+              <Bar
+                dataKey="count"
+                fill="#3b82f6"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+    </div>
+
+    {/* RECENT DATA */}
+    <div className="grid md:grid-cols-2 gap-6">
+
       <div className="bg-white p-6 rounded-xl shadow-md">
         <h2 className="text-2xl font-bold mb-4">
           Recent Assets
         </h2>
 
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-3">
-                Name
-              </th>
+        <div className="space-y-3">
+          {recentAssets.map((asset) => (
+            <div
+              key={asset.id}
+              className="border rounded-lg p-4"
+            >
+              <h3 className="font-semibold">
+                {asset.name}
+              </h3>
 
-              <th className="text-left p-3">
-                Type
-              </th>
+              <p className="text-slate-500">
+                {asset.assetType}
+              </p>
 
-              <th className="text-left p-3">
-                Status
-              </th>
-            </tr>
-          </thead>
+              <p className="text-sm mt-1">
+                {asset.status}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <tbody>
-            {recentAssets.map(
-              (asset) => (
-                <tr
-                  key={asset.id}
-                  className="border-b hover:bg-slate-50"
-                >
-                  <td className="p-3">
-                    {asset.name}
-                  </td>
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-2xl font-bold mb-4">
+          Recent Tickets
+        </h2>
 
-                  <td className="p-3">
-                    {asset.assetType}
-                  </td>
+        <div className="space-y-3">
+          {recentTickets.map((ticket) => (
+            <div
+              key={ticket.id}
+              className="border rounded-lg p-4"
+            >
+              <h3 className="font-semibold">
+                {ticket.title}
+              </h3>
 
-                  <td className="p-3">
-                    {asset.status}
-                  </td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </table>
+              <p className="text-slate-500">
+                {ticket.priority}
+              </p>
+
+              <p className="text-sm mt-1">
+                {ticket.status}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+
+    {/* RECENT ACTIVITY */}
+    <div className="bg-white p-6 rounded-xl shadow-md">
+      <h2 className="text-2xl font-bold mb-6">
+        Recent Activity
+      </h2>
+
+      <div className="space-y-4">
+        {activities.map(
+          (activity, index) => (
+            <div
+              key={index}
+              className="border-l-4 border-slate-900 pl-4"
+            >
+              <p className="font-medium">
+                {activity.title}
+              </p>
+
+              <p className="text-sm text-slate-500">
+                {new Date(
+                  activity.date
+                ).toLocaleString()}
+              </p>
+            </div>
+          )
+        )}
       </div>
     </div>
-  );
+
+  </div>
+);
 }
 
 export default DashboardPage;
