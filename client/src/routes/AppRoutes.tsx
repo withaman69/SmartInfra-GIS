@@ -19,6 +19,7 @@ import TicketsPage from "../pages/TicketsPage";
 import TicketDashboardPage
 from "../pages/TicketDashboardPage";
 import LandingPage from "../pages/LandingPage";
+import UsersPage from "../pages/UsersPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -48,7 +49,10 @@ function AppRoutes() {
       </ProtectedRoute>
     }
   />
-
+<Route
+  path="/users"
+  element={<UsersPage />}
+/>
   <Route
     path="/assets"
     element={

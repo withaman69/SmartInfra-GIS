@@ -13,56 +13,69 @@ import {
   FiTool,
   FiSearch,
   FiLogOut,
+  FiUsers,
 } from "react-icons/fi";
 
 function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-const user = JSON.parse(
-  localStorage.getItem("user") || "{}"
-);
-console.log("Current User:", user);
- const menuItems = [
-  {
-    name: "Dashboard",
-    path: "/dashboard",
-    icon: <FiHome />,
-  },
 
-  {
-    name: "Assets",
-    path: "/assets",
-    icon: <FiDatabase />,
-  },
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
 
-  {
-    name: "GIS Map",
-    path: "/map",
-    icon: <FiMap />,
-  },
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <FiHome />,
+    },
 
-  ...(user.role === "ADMIN" || user.role === "ENGINEER"
-    ? [
-        {
-          name: "Create Asset",
-          path: "/create-asset",
-          icon: <FiPlusCircle />,
-        },
-      ]
-    : []),
+    {
+      name: "Assets",
+      path: "/assets",
+      icon: <FiDatabase />,
+    },
 
-  {
-    name: "Nearby Assets",
-    path: "/nearby-assets",
-    icon: <FiSearch />,
-  },
+    {
+      name: "GIS Map",
+      path: "/map",
+      icon: <FiMap />,
+    },
 
-  {
-    name: "Tickets",
-    path: "/tickets",
-    icon: <FiTool />,
-  },
-];
+    ...(user.role === "ADMIN" ||
+    user.role === "ENGINEER"
+      ? [
+          {
+            name: "Create Asset",
+            path: "/create-asset",
+            icon: <FiPlusCircle />,
+          },
+        ]
+      : []),
+
+    ...(user.role === "ADMIN"
+      ? [
+          {
+            name: "Users",
+            path: "/users",
+            icon: <FiUsers />,
+          },
+        ]
+      : []),
+
+    {
+      name: "Nearby Assets",
+      path: "/nearby-assets",
+      icon: <FiSearch />,
+    },
+
+    {
+      name: "Tickets",
+      path: "/tickets",
+      icon: <FiTool />,
+    },
+  ];
 
   return (
     <div className="flex min-h-screen bg-stone-50">
@@ -77,6 +90,10 @@ console.log("Current User:", user);
 
           <p className="text-slate-400 text-sm mt-1">
             Infrastructure Platform
+          </p>
+
+          <p className="text-xs text-slate-500 mt-3">
+            {user.name} ({user.role})
           </p>
         </div>
 
@@ -103,9 +120,8 @@ console.log("Current User:", user);
 
           <button
             onClick={() => {
-              localStorage.removeItem(
-                "token"
-              );
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
 
               navigate("/");
             }}
@@ -116,6 +132,7 @@ console.log("Current User:", user);
           </button>
 
         </div>
+
       </aside>
 
       {/* Main Content */}
