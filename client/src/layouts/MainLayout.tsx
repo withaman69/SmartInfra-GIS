@@ -41,7 +41,7 @@ console.log("Current User:", user);
     icon: <FiMap />,
   },
 
-  ...(user.role === "ADMIN"
+  ...(user.role === "ADMIN" || user.role === "ENGINEER"
     ? [
         {
           name: "Create Asset",
