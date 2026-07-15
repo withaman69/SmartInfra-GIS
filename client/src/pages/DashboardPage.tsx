@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-
+import { exportDashboardReport } from "../utils/exportReport";
 import {
   PieChart,
   Pie,
@@ -14,6 +14,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import DashboardMap from "../components/DashboardMap";
 import { useNavigate } from "react-router-dom";
 const COLORS = ["#22c55e", "#eab308", "#ef4444"];
 
@@ -33,6 +34,8 @@ function DashboardPage() {
   const [recentAssets, setRecentAssets] = useState<any[]>([]);
   const [recentTickets, setRecentTickets] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+  const [healthData, setHealthData] =
+  useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [ticketStats, setTicketStats] = useState({
     total: 0,
@@ -42,6 +45,34 @@ function DashboardPage() {
   });
 
   useEffect(() => {
+    const fetchHealthAnalytics =
+  async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res =
+        await api.get(
+          "/assets/health-analytics",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+      console.log(
+        "Health Analytics:",
+        res.data
+      );
+
+      setHealthData(
+        res.data.data
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
     setUser(storedUser);
@@ -91,7 +122,7 @@ function DashboardPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const profileRes = await api.get("/auth/profile", {
+        const profileRes = await api.get("/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -119,6 +150,7 @@ function DashboardPage() {
     };
 
     fetchData();
+    fetchHealthAnalytics();
   }, []);
   const getQuickActions = () => {
     if (!user) return [];
@@ -170,122 +202,58 @@ function DashboardPage() {
   };
   return (
     <div className="space-y-8">
-      {/* HEADER */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-        <h1 className="text-4xl font-bold text-slate-900">
-          Infrastructure Command Center
-        </h1>
+     {/* HEADER */}
+<div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+  <h1 className="text-4xl font-bold text-slate-900">
+    Infrastructure Command Center
+  </h1>
 
-        {user && (
-          <span className="inline-block mt-3 px-4 py-1 bg-slate-100 rounded-full text-sm">
-            Role: {user.role}
-          </span>
-        )}
+  {user && (
+    <span className="inline-block mt-3 px-4 py-1 bg-slate-100 rounded-full text-sm">
+      Role: {user.role}
+    </span>
+  )}
 
-        <p className="text-slate-600 mt-4 text-lg">
-          Monitor infrastructure assets, manage maintenance operations, and
-          visualize GIS intelligence from a single platform.
-        </p>
+  <p className="text-slate-600 mt-4 text-lg">
+    Monitor infrastructure assets, manage maintenance operations, and
+    visualize GIS intelligence from a single platform.
+  </p>
 
-        <div className="flex gap-3 mt-6">
-          {user?.role === "ADMIN" && (
-            <button
-              onClick={() => navigate("/create-asset")}
-              className="bg-slate-900 text-white px-5 py-2 rounded-lg"
-            >
-              Create Asset
-            </button>
-          )}
+  <div className="flex flex-wrap gap-3 mt-6">
 
-          <button
-            onClick={() => navigate("/tickets")}
-            className="border border-slate-300 px-5 py-2 rounded-lg"
-          >
-            View Tickets
-          </button>
-        </div>
-      </div>
-      {user?.role === "ADMIN" && (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-purple-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Admin Controls</h3>
+    {user?.role === "ADMIN" && (
+      <button
+        onClick={() => navigate("/create-asset")}
+        className="bg-slate-900 text-white px-5 py-2 rounded-lg hover:bg-slate-800"
+      >
+        Create Asset
+      </button>
+    )}
 
-            <p className="text-slate-600 mt-2">
-              Manage assets, engineers and tickets.
-            </p>
-          </div>
+    <button
+      onClick={() => navigate("/tickets")}
+      className="border border-slate-300 px-5 py-2 rounded-lg hover:bg-slate-100"
+    >
+      View Tickets
+    </button>
 
-          <div className="bg-blue-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">System Overview</h3>
+    <button
+      onClick={() =>
+        exportDashboardReport({
+          totalAssets: stats.total,
+          activeAssets: stats.active,
+          maintenanceAssets: stats.maintenance,
+          inactiveAssets: stats.inactive,
+          totalTickets: ticketStats.total,
+        })
+      }
+      className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700"
+    >
+      📄 Export Report
+    </button>
 
-            <p className="text-slate-600 mt-2">
-              Monitor complete infrastructure network.
-            </p>
-          </div>
-
-          <div className="bg-green-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Asset Management</h3>
-
-            <p className="text-slate-600 mt-2">
-              Create, update and delete assets.
-            </p>
-          </div>
-        </div>
-      )}
-      {user?.role === "ENGINEER" && (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-yellow-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Assigned Tickets</h3>
-
-            <p className="text-slate-600 mt-2">
-              Track and resolve maintenance tasks.
-            </p>
-          </div>
-
-          <div className="bg-blue-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Field Operations</h3>
-
-            <p className="text-slate-600 mt-2">
-              Manage infrastructure inspections.
-            </p>
-          </div>
-
-          <div className="bg-green-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Asset Updates</h3>
-
-            <p className="text-slate-600 mt-2">
-              Update infrastructure records.
-            </p>
-          </div>
-        </div>
-      )}
-      {user?.role === "RESEARCHER" && (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-cyan-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">GIS Analysis</h3>
-
-            <p className="text-slate-600 mt-2">
-              Explore infrastructure spatial data.
-            </p>
-          </div>
-
-          <div className="bg-indigo-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Research Insights</h3>
-
-            <p className="text-slate-600 mt-2">
-              Analyze asset performance trends.
-            </p>
-          </div>
-
-          <div className="bg-green-100 p-6 rounded-xl">
-            <h3 className="font-bold text-lg">Data Export</h3>
-
-            <p className="text-slate-600 mt-2">
-              Generate reports and datasets.
-            </p>
-          </div>
-        </div>
-      )}
+  </div>
+</div>
       {/* ASSET KPIs */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Asset Overview</h2>
@@ -316,6 +284,35 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+      <div className="bg-white p-6 rounded-xl shadow-md">
+  <h2 className="text-2xl font-bold mb-4">
+    Asset Health Analytics
+  </h2>
+
+  <div className="h-[350px]">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <PieChart>
+        <Pie
+          data={healthData}
+          dataKey="count"
+          nameKey="category"
+          outerRadius={120}
+          label
+        >
+          <Cell fill="#22c55e" />
+          <Cell fill="#f59e0b" />
+          <Cell fill="#ef4444" />
+        </Pie>
+
+        <Tooltip />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+</div>
 
       {/* TICKET KPIs */}
       <div>
@@ -412,6 +409,15 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+      <div className="bg-white p-6 rounded-xl shadow-md">
+  <h2 className="text-2xl font-bold mb-4">
+    Infrastructure GIS View
+  </h2>
+
+  <DashboardMap
+    assets={recentAssets}
+  />
+</div>
 
       {/* RECENT DATA */}
       <div className="grid md:grid-cols-2 gap-6">

@@ -14,6 +14,7 @@ import {
   FiSearch,
   FiLogOut,
   FiUsers,
+  FiBell,
 } from "react-icons/fi";
 
 function MainLayout() {
@@ -42,7 +43,15 @@ function MainLayout() {
       path: "/map",
       icon: <FiMap />,
     },
-
+...(user.role === "ADMIN"
+  ? [
+      {
+        name: "Audit Logs",
+        path: "/audit-logs",
+        icon: <FiDatabase />,
+      },
+    ]
+  : []),
     ...(user.role === "ADMIN" ||
     user.role === "ENGINEER"
       ? [
@@ -69,12 +78,21 @@ function MainLayout() {
       path: "/nearby-assets",
       icon: <FiSearch />,
     },
-
+{
+  name: "Notifications",
+  path: "/notifications",
+  icon: <FiBell />,
+},
     {
       name: "Tickets",
       path: "/tickets",
       icon: <FiTool />,
     },
+    {
+  name: "Ticket Analytics",
+  path: "/ticket-analytics",
+  icon: <FiTool />,
+},
   ];
 
   return (

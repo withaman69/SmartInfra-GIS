@@ -20,6 +20,11 @@ import TicketDashboardPage
 from "../pages/TicketDashboardPage";
 import LandingPage from "../pages/LandingPage";
 import UsersPage from "../pages/UsersPage";
+import AuditLogsPage from "../pages/AuditLogsPage";
+import NotificationsPage
+from "../pages/NotificationsPage";
+import TicketAnalyticsPage
+from "../pages/TicketAnalyticsPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -53,6 +58,10 @@ function AppRoutes() {
   path="/users"
   element={<UsersPage />}
 />
+<Route
+  path="/audit-logs"
+  element={<AuditLogsPage />}
+/>
   <Route
     path="/assets"
     element={
@@ -74,7 +83,10 @@ function AppRoutes() {
   path="/assets/:id"
   element={<AssetDetailsPage />}
 />
-
+<Route
+  path="/notifications"
+  element={<NotificationsPage />}
+/>
   <Route
     path="/create-asset"
     element={
@@ -115,6 +127,10 @@ function AppRoutes() {
       <TicketDashboardPage />
     </ProtectedRoute>
   }
+/>
+<Route
+  path="/ticket-analytics"
+  element={<TicketAnalyticsPage />}
 />
       </Routes>
     </BrowserRouter>

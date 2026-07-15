@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { AssetService } from "../services/asset.service";
-import { PrismaClient } from "@prisma/client";
-import cloudinary from "../config/cloudinary";
-import multer from "multer";
 
+import cloudinary from "../config/cloudinary";
+
+import { createAuditLog } from "../utils/audit";
 export class AssetController {
   static async create(
     req: Request,
@@ -14,6 +14,13 @@ export class AssetController {
         ...req.body,
         createdById: req.user!.userId,
       });
+     await createAuditLog(
+  req.user!.userId,
+  "CREATE",
+  "ASSET",
+  asset.id,
+  `Created asset ${asset.name}`
+);
 
       res.status(201).json({
         success: true,
@@ -83,7 +90,13 @@ export class AssetController {
         req.params.id,
         req.body
       );
-
+      await createAuditLog(
+  req.user!.userId,
+  "UPDATE",
+  "ASSET",
+  asset.id,
+  `Updated asset ${asset.name}`
+);
       res.status(200).json({
         success: true,
         asset,
@@ -96,26 +109,39 @@ export class AssetController {
     }
   }
 
-  static async delete(
-    req: Request<{ id: string }>,
-    res: Response
-  ) {
-    try {
-      await AssetService.delete(
+static async delete(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const asset =
+      await AssetService.getById(
         req.params.id
       );
 
-      res.status(200).json({
-        success: true,
-        message: "Asset deleted successfully",
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
-    }
+    await createAuditLog(
+      req.user!.userId,
+      "DELETE",
+      "ASSET",
+      req.params.id,
+      `Deleted asset ${asset?.name}`
+    );
+
+    await AssetService.delete(
+      req.params.id
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Asset deleted successfully",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
+}
   static async geoJson(
   _req: Request,
   res: Response
@@ -311,6 +337,13 @@ console.log(
   "UPLOAD RESULT:",
   result
 );
+await createAuditLog(
+  req.user!.userId,
+  "UPLOAD",
+  "ASSET_IMAGE",
+  "IMAGE",
+  "Uploaded asset image"
+);
 
     return res.json({
       success: true,
@@ -366,6 +399,27 @@ static async recent(
       success: false,
       message:
         "Failed to fetch recent assets",
+    });
+  }
+}
+
+static async healthAnalytics(
+  req: Request,
+  res: Response
+) {
+  try {
+    const data =
+      await AssetService.getHealthAnalytics();
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
     });
   }
 }

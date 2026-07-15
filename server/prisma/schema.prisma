@@ -57,11 +57,14 @@ model utilities {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  name            String
-  email           String   @unique
-  passwordHash    String
-  role            UserRole @default(RESEARCHER)
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  notifications Notification[]
+  role          UserRole       @default(RESEARCHER)
+  auditLogs     AuditLog[]
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   assets          Asset[]
@@ -82,6 +85,7 @@ model Asset {
   createdById String
   createdBy   User        @relation(fields: [createdById], references: [id])
   tickets     Ticket[]
+  healthScore Int @default(100)
 }
 
 model Ticket {
@@ -96,6 +100,35 @@ model Ticket {
   priority     Priority     @default(MEDIUM)
   asset        Asset        @relation(fields: [assetId], references: [id])
   assignedTo   User?        @relation(fields: [assignedToId], references: [id])
+}
+
+model AuditLog {
+  id          String @id @default(uuid())
+  action      String
+  entityType  String
+  entityId    String
+  description String
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  title   String
+  message String
+
+  isRead Boolean @default(false)
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 enum UserRole {

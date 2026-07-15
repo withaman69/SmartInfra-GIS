@@ -17,7 +17,16 @@ static async create(data: {
   createdById: string;
 }) {
   return prisma.asset.create({
-    data,
+    data: {
+      ...data,
+
+      healthScore:
+        data.status === "ACTIVE"
+          ? 95
+          : data.status === "MAINTENANCE"
+          ? 60
+          : 20,
+    },
   });
 }
 
@@ -177,6 +186,44 @@ static async getRecentAssets() {
     },
     take: 5,
   });
+}
+
+static async getHealthAnalytics() {
+  const assets =
+    await prisma.asset.findMany({
+      select: {
+        healthScore: true,
+      },
+    });
+
+  const healthy = assets.filter(
+    (a) => a.healthScore >= 80
+  ).length;
+
+  const warning = assets.filter(
+    (a) =>
+      a.healthScore >= 50 &&
+      a.healthScore < 80
+  ).length;
+
+  const critical = assets.filter(
+    (a) => a.healthScore < 50
+  ).length;
+
+  return [
+    {
+      category: "Healthy",
+      count: healthy,
+    },
+    {
+      category: "Warning",
+      count: warning,
+    },
+    {
+      category: "Critical",
+      count: critical,
+    },
+  ];
 }
 
 }

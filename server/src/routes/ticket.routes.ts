@@ -8,6 +8,12 @@ router.use(authenticate);
 
 router.post(
   "/",
+  authenticate,
+  authorize(
+    "ADMIN",
+    "ENGINEER",
+    "RESEARCHER"
+  ),
   TicketController.create
 );
 
@@ -26,17 +32,39 @@ router.get(
 );
 
 router.get(
+  "/my-tickets",
+  authenticate,
+  TicketController.myTickets
+);
+router.get(
+  "/asset/:assetId",
+  TicketController.getByAsset
+);
+router.get(
+  "/analytics",
+  authenticate,
+  TicketController.analytics
+);
+router.get(
   "/:id",
   TicketController.getById
 );
 
 router.put(
   "/:id",
+  authenticate,
+  authorize(
+    "ADMIN",
+    "ENGINEER"
+  ),
   TicketController.update
 );
 
+
 router.delete(
   "/:id",
+  authenticate,
+  authorize("ADMIN"),
   TicketController.delete
 );
 

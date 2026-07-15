@@ -1,13 +1,26 @@
 import { TicketRepository } from "../repositories/ticket.repository";
 import { prisma } from "../config/db";
+import { NotificationService }
+from "./notification.service";
 export class TicketService {
   static async createTicket(
-    data: any
-  ) {
-    return TicketRepository.create(
+  data: any
+) {
+  const ticket =
+    await TicketRepository.create(
       data
     );
+
+  if (data.createdById) {
+    await NotificationService.create(
+      data.createdById,
+      "Ticket Created",
+      `Ticket "${ticket.title}" was created successfully`
+    );
   }
+
+  return ticket;
+}
 
   static async getAllTickets() {
     return TicketRepository.findAll();
@@ -21,16 +34,29 @@ export class TicketService {
     );
   }
 
-  static async updateTicket(
-    id: string,
-    data: any
-  ) {
-    return TicketRepository.update(
+ static async updateTicket(
+  id: string,
+  data: any
+) {
+
+  const ticket =
+    await TicketRepository.update(
       id,
       data
     );
+
+  if (data.assignedToId) {
+
+    await NotificationService.create(
+      data.assignedToId,
+      "New Ticket Assigned",
+      `You have been assigned ticket: ${ticket.title}`
+    );
+
   }
 
+  return ticket;
+}
   static async deleteTicket(
     id: string
   ) {
@@ -112,5 +138,89 @@ static async getCharts() {
   };
 }
 
+static async getMyTickets(
+  engineerId: string
+) {
+  return prisma.ticket.findMany({
+    where: {
+      assignedToId: engineerId,
+    },
+    include: {
+      asset: true,
+    },
+  });
+}
+
+static async getByAsset(
+  assetId: string
+) {
+  return prisma.ticket.findMany({
+    where: {
+      assetId,
+    },
+    include: {
+      asset: true,
+      assignedTo: true,
+    },
+  });
+}
+
+static async getAnalytics() {
+  const open =
+    await prisma.ticket.count({
+      where: {
+        status: "OPEN",
+      },
+    });
+
+  const inProgress =
+    await prisma.ticket.count({
+      where: {
+        status: "IN_PROGRESS",
+      },
+    });
+
+  const resolved =
+    await prisma.ticket.count({
+      where: {
+        status: "RESOLVED",
+      },
+    });
+
+  const high =
+    await prisma.ticket.count({
+      where: {
+        priority: "HIGH",
+      },
+    });
+
+  const medium =
+    await prisma.ticket.count({
+      where: {
+        priority: "MEDIUM",
+      },
+    });
+
+  const low =
+    await prisma.ticket.count({
+      where: {
+        priority: "LOW",
+      },
+    });
+
+  return {
+    status: {
+      open,
+      inProgress,
+      resolved,
+    },
+
+    priority: {
+      high,
+      medium,
+      low,
+    },
+  };
+}
 
 }

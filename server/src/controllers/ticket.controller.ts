@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { TicketService } from "../services/ticket.service";
-
+import { prisma } from "../config/db";
 export class TicketController {
   static async create(
     req: Request,
@@ -125,6 +125,16 @@ static async assignEngineer(
         }
       );
 
+    await prisma.notification.create({
+      data: {
+        userId:
+          req.body.assignedToId,
+        title:
+          "New Ticket Assigned",
+        message: `You have been assigned ticket "${ticket.title}"`,
+      },
+    });
+
     res.json({
       success: true,
       ticket,
@@ -170,6 +180,75 @@ static async charts(
     res.json({
       success: true,
       ...charts,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+    });
+  }
+}
+
+static async myTickets(
+  req: Request,
+  res: Response
+) {
+  try {
+    const tickets =
+      await TicketService.getMyTickets(
+        req.user!.userId
+      );
+
+    res.json({
+      success: true,
+      tickets,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch tickets",
+    });
+  }
+}
+
+static async getByAsset(
+  req: Request<{ assetId: string }>,
+  res: Response
+) {
+  try {
+    const tickets =
+      await TicketService.getByAsset(
+        req.params.assetId
+      );
+
+    res.json({
+      success: true,
+      tickets,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+    });
+  }
+}
+
+static async analytics(
+  req: Request,
+  res: Response
+) {
+  try {
+    const analytics =
+      await TicketService.getAnalytics();
+
+    res.json({
+      success: true,
+      analytics,
     });
   } catch (error) {
     console.error(error);

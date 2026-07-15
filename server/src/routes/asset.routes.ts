@@ -42,7 +42,7 @@ router.post(
   authorize(
     "ADMIN",
     "ENGINEER",
-    "RESEARCHER"
+    
   ),
   validate(createAssetSchema),
   AssetController.create
@@ -85,6 +85,11 @@ router.get(
   AssetController.recent
 );
 router.get(
+  "/health-analytics",
+  authenticate,
+  AssetController.healthAnalytics
+);
+router.get(
   "/:id",
   authenticate,
   AssetController.getById
@@ -110,6 +115,10 @@ router.delete(
 router.post(
   "/upload-image",
   authenticate,
+  authorize(
+    "ADMIN",
+    "ENGINEER"
+  ),
   upload.single("image"),
   AssetController.uploadImage
 );

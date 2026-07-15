@@ -11,6 +11,7 @@ interface Asset {
   latitude: number;
   longitude: number;
   imageUrl?: string;
+  healthScore: number;
   createdAt: string;
 }
 
@@ -22,7 +23,8 @@ function AssetDetailsPage() {
 
   const [asset, setAsset] = useState<Asset | null>(null);
   const [tickets, setTickets] = useState<any[]>([]);
-
+const [logs, setLogs] =
+  useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTicketModal, setShowTicketModal] = useState(false);
 
@@ -76,6 +78,30 @@ function AssetDetailsPage() {
 
     fetchTickets();
   }, [id]);
+  useEffect(() => {
+  const fetchLogs = async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res =
+        await api.get(
+          `/audit/asset/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+      setLogs(res.data.logs);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchLogs();
+}, [id]);
   const createTicket = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -163,6 +189,30 @@ function AssetDetailsPage() {
             <strong>Created:</strong>{" "}
             {new Date(asset.createdAt).toLocaleString()}
           </p>
+          <div className="mt-6">
+  <p className="font-semibold mb-2">
+    Health Score
+  </p>
+
+  <div className="w-full bg-slate-200 rounded-full h-4">
+    <div
+      className={`h-4 rounded-full ${
+        asset.healthScore > 80
+          ? "bg-green-500"
+          : asset.healthScore > 50
+          ? "bg-yellow-500"
+          : "bg-red-500"
+      }`}
+      style={{
+        width: `${asset.healthScore}%`,
+      }}
+    />
+  </div>
+
+  <p className="mt-2 text-sm font-medium">
+    {asset.healthScore}%
+  </p>
+</div>
         </div>
 
         <div className="flex gap-4 mt-8">
@@ -234,7 +284,45 @@ function AssetDetailsPage() {
           </div>
         )}
       </div>
+<div className="bg-white rounded-xl shadow-lg p-8">
 
+  <h2 className="text-2xl font-bold mb-6">
+    Asset Activity Timeline
+  </h2>
+
+  {logs.length === 0 ? (
+    <p className="text-slate-500">
+      No activity found.
+    </p>
+  ) : (
+    <div className="space-y-4">
+
+      {logs.map((log) => (
+        <div
+          key={log.id}
+          className="border-l-4 border-blue-500 pl-4 py-2"
+        >
+          <h3 className="font-semibold">
+            {log.action}
+          </h3>
+
+          <p className="text-slate-600">
+            {log.description}
+          </p>
+
+          <p className="text-sm text-slate-400">
+            {log.user?.name} •{" "}
+            {new Date(
+              log.createdAt
+            ).toLocaleString()}
+          </p>
+        </div>
+      ))}
+
+    </div>
+  )}
+
+</div>
       {/* CREATE TICKET MODAL */}
 
       {showTicketModal && (

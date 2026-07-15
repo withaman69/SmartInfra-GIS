@@ -9,6 +9,11 @@ import { errorHandler } from "./middlewares/error.middleware";
 import ticketRoutes from "./routes/ticket.routes";
 import userRoutes from "./routes/user.routes";
 import activityRoutes from "./routes/activity.routes";
+import auditRoutes from "./routes/audit.routes";
+import notificationRoutes
+from "./routes/notification.routes";
+import analyticsRoutes
+from "./routes/analytics.routes";
 const app = express();
 
 app.use(cors());
@@ -37,5 +42,14 @@ app.use("/api/users", userRoutes);
 app.use(
   "/api/activity",
   activityRoutes
+);
+app.use("/api/audit", auditRoutes);
+app.use(
+  "/api/notifications",
+  notificationRoutes
+);
+app.use(
+  "/api/analytics",
+  analyticsRoutes
 );
 export default app;
