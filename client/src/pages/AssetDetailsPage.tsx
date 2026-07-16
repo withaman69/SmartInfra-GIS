@@ -13,6 +13,7 @@ interface Asset {
   imageUrl?: string;
   healthScore: number;
   createdAt: string;
+  
 }
 
 function AssetDetailsPage() {
@@ -24,6 +25,8 @@ function AssetDetailsPage() {
   const [asset, setAsset] = useState<Asset | null>(null);
   const [tickets, setTickets] = useState<any[]>([]);
 const [logs, setLogs] =
+  useState<any[]>([]);
+  const [healthHistory, setHealthHistory] =
   useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTicketModal, setShowTicketModal] = useState(false);
@@ -101,6 +104,36 @@ const [logs, setLogs] =
   };
 
   fetchLogs();
+}, [id]);
+useEffect(() => {
+  const fetchHealthHistory =
+    async () => {
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const res =
+          await api.get(
+            `/assets/${id}/health-history`,
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        setHealthHistory(
+          res.data.history
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+  fetchHealthHistory();
 }, [id]);
   const createTicket = async () => {
     try {
@@ -189,6 +222,38 @@ const [logs, setLogs] =
             <strong>Created:</strong>{" "}
             {new Date(asset.createdAt).toLocaleString()}
           </p>
+          <div className="mt-4">
+  <p className="font-semibold mb-2">
+    Health Score
+  </p>
+
+  <div className="w-full bg-slate-200 rounded-full h-4">
+    <div
+      className={`h-4 rounded-full ${
+        asset.healthScore > 70
+          ? "bg-green-500"
+          : asset.healthScore > 40
+          ? "bg-yellow-500"
+          : "bg-red-500"
+      }`}
+      style={{
+        width: `${asset.healthScore}%`,
+      }}
+    />
+  </div>
+
+  <p
+    className={`mt-2 font-bold ${
+      asset.healthScore > 70
+        ? "text-green-600"
+        : asset.healthScore > 40
+        ? "text-yellow-600"
+        : "text-red-600"
+    }`}
+  >
+    {asset.healthScore}/100
+  </p>
+</div>
           <div className="mt-6">
   <p className="font-semibold mb-2">
     Health Score
@@ -240,7 +305,44 @@ const [logs, setLogs] =
           </button>
         </div>
       </div>
+<div className="bg-white rounded-xl shadow-lg p-8">
 
+  <h2 className="text-2xl font-bold mb-6">
+    Health History
+  </h2>
+
+  {healthHistory.length === 0 ? (
+    <p className="text-slate-500">
+      No health history found.
+    </p>
+  ) : (
+    <div className="space-y-4">
+
+      {healthHistory.map(
+        (entry) => (
+          <div
+            key={entry.id}
+            className="border-l-4 border-green-500 pl-4 py-2"
+          >
+            <h3 className="font-semibold">
+              Health Score:
+              {" "}
+              {entry.healthScore}
+            </h3>
+
+            <p className="text-sm text-slate-500">
+              {new Date(
+                entry.createdAt
+              ).toLocaleString()}
+            </p>
+          </div>
+        )
+      )}
+
+    </div>
+  )}
+
+</div>
       {/* TICKETS SECTION */}
 
       <div className="bg-white rounded-xl shadow-lg p-8">

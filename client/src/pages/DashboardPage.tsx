@@ -36,6 +36,8 @@ function DashboardPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [healthData, setHealthData] =
   useState<any[]>([]);
+  const [criticalAssets, setCriticalAssets] =
+  useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [ticketStats, setTicketStats] = useState({
     total: 0,
@@ -91,6 +93,17 @@ function DashboardPage() {
             Authorization: `Bearer ${token}`,
           },
         });
+        const criticalRes =
+  await api.get(
+    "/assets/critical-assets",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+        setCriticalAssets(criticalRes.data.assets);
 
         const recentRes = await api.get("/assets/recent", {
           headers: {
@@ -201,7 +214,25 @@ function DashboardPage() {
     }
   };
   return (
+
     <div className="space-y-8">
+    {criticalAssets.length > 0 && (
+  <div className="mb-6 bg-red-100 border border-red-300 text-red-700 px-6 py-4 rounded-xl">
+    <h2 className="font-bold text-lg">
+      ⚠ {criticalAssets.length} Asset
+      {criticalAssets.length > 1
+        ? "s Need"
+        : " Needs"}{" "}
+      Immediate Attention
+    </h2>
+
+    <p className="text-sm mt-1">
+      Assets with low health score
+      or maintenance status have
+      been detected.
+    </p>
+  </div>
+)}
      {/* HEADER */}
 <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
   <h1 className="text-4xl font-bold text-slate-900">
@@ -313,7 +344,59 @@ function DashboardPage() {
     </ResponsiveContainer>
   </div>
 </div>
+<div className="bg-white p-6 rounded-xl shadow-md">
+  <h2 className="text-2xl font-bold mb-4">
+    Assets Needing Attention
+  </h2>
 
+  {criticalAssets.length === 0 ? (
+    <p className="text-green-600">
+      No critical assets found.
+    </p>
+  ) : (
+    <div className="space-y-4">
+      {criticalAssets.map(
+        (asset) => (
+          <div
+  key={asset.id}
+  onClick={() =>
+    navigate(`/assets/${asset.id}`)
+  }
+  className="border rounded-lg p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50"
+>
+            <div>
+              <h3 className="font-bold">
+                {asset.name}
+              </h3>
+
+              <p className="text-sm text-slate-600">
+                {asset.assetType}
+              </p>
+            </div>
+
+            <div className="text-right">
+             <p
+  className={`font-semibold ${
+    asset.healthScore > 70
+      ? "text-green-600"
+      : asset.healthScore > 40
+      ? "text-yellow-600"
+      : "text-red-600"
+  }`}
+>
+  Health: {asset.healthScore}
+</p>
+
+              <p className="text-sm">
+                {asset.status}
+              </p>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  )}
+</div>
       {/* TICKET KPIs */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Ticket Operations</h2>
