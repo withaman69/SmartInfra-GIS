@@ -90,6 +90,16 @@ router.get(
   AssetController.healthAnalytics
 );
 router.get(
+  "/critical-assets",
+  authenticate,
+  AssetController.criticalAssets
+);
+router.get(
+  "/:id/health-history",
+  authenticate,
+  AssetController.healthHistory
+);
+router.get(
   "/:id",
   authenticate,
   AssetController.getById

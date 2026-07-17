@@ -225,5 +225,41 @@ static async getHealthAnalytics() {
     },
   ];
 }
+static async getCriticalAssets() {
+  return prisma.asset.findMany({
+    where: {
+      OR: [
+        {
+          healthScore: {
+            lte: 50,
+          },
+        },
+        {
+          status: "MAINTENANCE",
+        },
+      ],
+    },
 
+    orderBy: {
+      healthScore: "asc",
+    },
+
+    take: 5,
+  });
+}
+static async getHealthHistory(
+  assetId: string
+) {
+  return prisma.healthHistory.findMany({
+    where: {
+      assetId,
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+
+    take: 20,
+  });
+}
 }

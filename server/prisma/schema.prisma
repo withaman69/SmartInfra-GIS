@@ -86,6 +86,7 @@ model Asset {
   createdBy   User        @relation(fields: [createdById], references: [id])
   tickets     Ticket[]
   healthScore Int @default(100)
+  healthHistory HealthHistory[]
 }
 
 model Ticket {
@@ -129,6 +130,17 @@ model Notification {
   user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model HealthHistory {
+  id          String   @id @default(uuid())
+  assetId     String
+  healthScore Int
+
+  createdAt   DateTime @default(now())
+
+ asset Asset @relation(fields: [assetId], references: [id])
+  
 }
 
 enum UserRole {

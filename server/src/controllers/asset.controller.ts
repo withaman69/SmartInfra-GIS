@@ -423,4 +423,47 @@ static async healthAnalytics(
     });
   }
 }
+static async criticalAssets(
+  req: Request,
+  res: Response
+) {
+  try {
+    const assets =
+      await AssetService.getCriticalAssets();
+
+    res.json({
+      success: true,
+      assets,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+    });
+  }
+}
+static async healthHistory(
+  req: Request,
+  res: Response
+) {
+  try {
+    const history =
+      await AssetService.getHealthHistory(
+        req.params.id as string
+      );
+
+    res.json({
+      success: true,
+      history,
+    });
+  } catch (error: any) {
+  console.error(error);
+
+  res.status(500).json({
+    success: false,
+    error: error.message,
+  });
+}
+}
 }

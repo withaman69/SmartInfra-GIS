@@ -38,21 +38,60 @@ export class TicketService {
   id: string,
   data: any
 ) {
-
   const ticket =
     await TicketRepository.update(
       id,
       data
     );
 
-  if (data.assignedToId) {
+  if (
+    data.status === "RESOLVED"
+  ) {
+    const asset =
+      await prisma.asset.findUnique({
+        where: {
+          id: ticket.assetId,
+        },
+      });
 
-    await NotificationService.create(
-      data.assignedToId,
-      "New Ticket Assigned",
-      `You have been assigned ticket: ${ticket.title}`
-    );
+    if (asset) {
+      await prisma.asset.update({
+        where: {
+          id: asset.id,
+        },
+        data: {
+          healthScore: Math.min(
+            asset.healthScore + 10,
+            100
+          ),
+        },
+      });
+    }
+  }
 
+  if (
+    data.status === "OPEN"
+  ) {
+    const asset =
+      await prisma.asset.findUnique({
+        where: {
+          id: ticket.assetId,
+        },
+      });
+
+    if (asset) {
+      await prisma.asset.update({
+        where: {
+          id: asset.id,
+        },
+        data: {
+          healthScore: Math.max(
+            asset.healthScore - 10,
+            0
+          ),
+        },
+      });
+    }
   }
 
   return ticket;
@@ -222,5 +261,6 @@ static async getAnalytics() {
     },
   };
 }
+
 
 }
