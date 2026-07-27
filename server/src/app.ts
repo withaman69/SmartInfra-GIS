@@ -14,6 +14,8 @@ import notificationRoutes
 from "./routes/notification.routes";
 import analyticsRoutes
 from "./routes/analytics.routes";
+import reportRoutes
+from "./routes/report.routes";
 const app = express();
 
 app.use(cors());
@@ -39,6 +41,10 @@ app.use("/api/assets", assetRoutes);
 app.use(errorHandler);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/users", userRoutes);
+app.use(
+  "/api/reports",
+  reportRoutes
+);
 app.use(
   "/api/activity",
   activityRoutes

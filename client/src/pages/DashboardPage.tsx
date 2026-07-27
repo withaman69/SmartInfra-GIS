@@ -45,6 +45,91 @@ function DashboardPage() {
     inProgress: 0,
     resolved: 0,
   });
+  const downloadCSV = async () => {
+  try {
+    const token =
+      localStorage.getItem("token");
+
+    const res =
+      await api.get(
+        "/reports/assets-csv",
+        {
+          responseType: "blob",
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+    const url =
+      window.URL.createObjectURL(
+        new Blob([res.data])
+      );
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      "assets-report.csv"
+    );
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+  } catch (error) {
+    console.error(error);
+  }
+};const downloadPDF = async () => {
+  try {
+    const token =
+      localStorage.getItem("token");
+
+    const res =
+      await api.get(
+        "/reports/assets-pdf",
+        {
+          responseType: "blob",
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+    const url =
+      window.URL.createObjectURL(
+        new Blob([res.data])
+      );
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.setAttribute(
+      "download",
+      "assets-report.pdf"
+    );
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
     const fetchHealthAnalytics =
@@ -282,7 +367,19 @@ function DashboardPage() {
     >
       📄 Export Report
     </button>
+<button
+  onClick={downloadCSV}
+  className="bg-green-600 text-white px-4 py-2 rounded-lg"
+>
+  Export CSV
+</button>
 
+<button
+  onClick={downloadPDF}
+  className="bg-red-600 text-white px-4 py-2 rounded-lg"
+>
+  Export PDF
+</button>
   </div>
 </div>
       {/* ASSET KPIs */}
