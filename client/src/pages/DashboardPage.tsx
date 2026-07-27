@@ -45,6 +45,14 @@ function DashboardPage() {
     inProgress: 0,
     resolved: 0,
   });
+  const [complaintStats,
+setComplaintStats] =
+  useState({
+    total: 0,
+    open: 0,
+    inProgress: 0,
+    resolved: 0,
+  });
   const downloadCSV = async () => {
   try {
     const token =
@@ -172,6 +180,16 @@ function DashboardPage() {
             Authorization: `Bearer ${token}`,
           },
         });
+        const complaintStatsRes =
+  await api.get(
+    "/complaints/stats",
+    {
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+      },
+    }
+  );
 
         const chartRes = await api.get("/assets/charts", {
           headers: {
@@ -242,6 +260,9 @@ function DashboardPage() {
 
         setRecentTickets(ticketsRes.data.tickets.slice(0, 5));
         setTicketStats(ticketStatsRes.data.stats);
+        setComplaintStats(
+  complaintStatsRes.data.stats
+);
       } catch (error) {
         console.error(error);
       }
@@ -383,36 +404,96 @@ function DashboardPage() {
   </div>
 </div>
       {/* ASSET KPIs */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Asset Overview</h2>
+     <div>
+  <h2 className="text-2xl font-bold mb-4">
+    Asset Overview
+  </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-gray-500">Total Assets</h3>
+  {/* Asset Cards */}
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-            <p className="text-3xl font-bold">{stats.total}</p>
-          </div>
+    <div className="bg-white p-6 rounded-xl shadow-md">
+      <h3 className="text-gray-500">
+        Total Assets
+      </h3>
 
-          <div className="bg-green-100 p-6 rounded-xl shadow-md">
-            <h3 className="text-green-700">Active</h3>
+      <p className="text-3xl font-bold">
+        {stats.total}
+      </p>
+    </div>
 
-            <p className="text-3xl font-bold">{stats.active}</p>
-          </div>
+    <div className="bg-green-100 p-6 rounded-xl shadow-md">
+      <h3 className="text-green-700">
+        Active
+      </h3>
 
-          <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
-            <h3 className="text-yellow-700">Maintenance</h3>
+      <p className="text-3xl font-bold">
+        {stats.active}
+      </p>
+    </div>
 
-            <p className="text-3xl font-bold">{stats.maintenance}</p>
-          </div>
+    <div className="bg-yellow-100 p-6 rounded-xl shadow-md">
+      <h3 className="text-yellow-700">
+        Maintenance
+      </h3>
 
-          <div className="bg-red-100 p-6 rounded-xl shadow-md">
-            <h3 className="text-red-700">Inactive</h3>
+      <p className="text-3xl font-bold">
+        {stats.maintenance}
+      </p>
+    </div>
 
-            <p className="text-3xl font-bold">{stats.inactive}</p>
-          </div>
-        </div>
-      </div>
-      <div className="bg-white p-6 rounded-xl shadow-md">
+    <div className="bg-red-100 p-6 rounded-xl shadow-md">
+      <h3 className="text-red-700">
+        Inactive
+      </h3>
+
+      <p className="text-3xl font-bold">
+        {stats.inactive}
+      </p>
+    </div>
+
+  </div>
+
+  {/* Complaint Cards */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+
+    <div className="bg-white p-6 rounded-xl shadow-md">
+      <h3>Total Complaints</h3>
+
+      <p className="text-3xl font-bold">
+        {complaintStats.total}
+      </p>
+    </div>
+
+    <div className="bg-red-50 p-6 rounded-xl shadow-md">
+      <h3>Open</h3>
+
+      <p className="text-3xl font-bold">
+        {complaintStats.open}
+      </p>
+    </div>
+
+    <div className="bg-yellow-50 p-6 rounded-xl shadow-md">
+      <h3>In Progress</h3>
+
+      <p className="text-3xl font-bold">
+        {complaintStats.inProgress}
+      </p>
+    </div>
+
+    <div className="bg-green-50 p-6 rounded-xl shadow-md">
+      <h3>Resolved</h3>
+
+      <p className="text-3xl font-bold">
+        {complaintStats.resolved}
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow-md">
   <h2 className="text-2xl font-bold mb-4">
     Asset Health Analytics
   </h2>
