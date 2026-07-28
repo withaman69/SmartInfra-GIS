@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AppRoutes from "./routes/AppRoutes";
 import AppLoader from "./components/AppLoader";
-
+import ComplaintsPage from "./pages/ComplaintsPage";
 function App() {
   const [loading, setLoading] =
     useState(true);

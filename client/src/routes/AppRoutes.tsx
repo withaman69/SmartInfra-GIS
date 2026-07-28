@@ -25,6 +25,7 @@ import NotificationsPage
 from "../pages/NotificationsPage";
 import TicketAnalyticsPage
 from "../pages/TicketAnalyticsPage";
+import ComplaintsPage from "../pages/ComplaintsPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -131,6 +132,10 @@ function AppRoutes() {
 <Route
   path="/ticket-analytics"
   element={<TicketAnalyticsPage />}
+/>
+<Route
+  path="/complaints"
+  element={<ComplaintsPage />}
 />
       </Routes>
     </BrowserRouter>

@@ -15,6 +15,7 @@ import {
   FiLogOut,
   FiUsers,
   FiBell,
+  FiAlertCircle,
 } from "react-icons/fi";
 
 function MainLayout() {
@@ -93,6 +94,11 @@ function MainLayout() {
   path: "/ticket-analytics",
   icon: <FiTool />,
 },
+{
+  name: "Complaints",
+  path: "/complaints",
+  icon: < FiAlertCircle />,
+}
   ];
 
   return (
