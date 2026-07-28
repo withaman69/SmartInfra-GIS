@@ -16,6 +16,8 @@ import analyticsRoutes
 from "./routes/analytics.routes";
 import reportRoutes
 from "./routes/report.routes";
+import complaintRoutes
+from "./routes/complaint.routes";
 const app = express();
 
 app.use(cors());
@@ -57,5 +59,9 @@ app.use(
 app.use(
   "/api/analytics",
   analyticsRoutes
+);
+app.use(
+  "/api/complaints",
+  complaintRoutes
 );
 export default app;
