@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 import AppRoutes from "./routes/AppRoutes";
 import AppLoader from "./components/AppLoader";
+
 function App() {
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 4000);
+    const hasVisited = localStorage.getItem("smartinfra-loader");
 
-    return () => clearTimeout(timer);
+    if (!hasVisited) {
+      setLoading(true);
+
+      const timer = setTimeout(() => {
+        localStorage.setItem("smartinfra-loader", "true");
+        setLoading(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   if (loading) {
