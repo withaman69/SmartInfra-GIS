@@ -22,7 +22,7 @@ function EditAssetPage() {
     const [image, setImage] =
   useState<File | null>(null);
 
-const [uploading, setUploading] =
+const [, setUploading] =
   useState(false);
 
   useEffect(() => {
