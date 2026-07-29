@@ -53,4 +53,42 @@ static async update(
       where: { id },
     });
   }
+  static async assignEngineer(
+  complaintId: string,
+  engineerId: string
+) {
+  return prisma.complaint.update({
+    where: {
+      id: complaintId,
+    },
+    data: {
+      assignedToId: engineerId,
+      status: "IN_PROGRESS",
+    },
+  });
+}
+static async getAssignedComplaints(
+  engineerId: string
+) {
+  return prisma.complaint.findMany({
+    where: {
+      assignedToId: engineerId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+static async resolveComplaint(
+  complaintId: string
+) {
+  return prisma.complaint.update({
+    where: {
+      id: complaintId,
+    },
+    data: {
+      status: "RESOLVED",
+    },
+  });
+}
 }

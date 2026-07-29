@@ -18,6 +18,10 @@ import reportRoutes
 from "./routes/report.routes";
 import complaintRoutes
 from "./routes/complaint.routes";
+import maintenanceRoutes
+from "./routes/maintenance.routes";
+import complaintTimelineRoutes
+from "./routes/complaintTimeline.routes";
 const app = express();
 
 app.use(cors());
@@ -63,5 +67,13 @@ app.use(
 app.use(
   "/api/complaints",
   complaintRoutes
+);
+app.use(
+  "/api/maintenance",
+  maintenanceRoutes
+);
+app.use(
+  "/api/complaint-timeline",
+  complaintTimelineRoutes
 );
 export default app;

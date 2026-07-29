@@ -26,6 +26,10 @@ from "../pages/NotificationsPage";
 import TicketAnalyticsPage
 from "../pages/TicketAnalyticsPage";
 import ComplaintsPage from "../pages/ComplaintsPage";
+import EngineerDashboardPage
+from "../pages/EngineerDashboardPage";
+import ComplaintDetailPage
+from "../pages/ComplaintDetailPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -136,6 +140,14 @@ function AppRoutes() {
 <Route
   path="/complaints"
   element={<ComplaintsPage />}
+/>
+<Route
+  path="/engineer"
+  element={<EngineerDashboardPage />}
+/>
+<Route
+  path="/complaints/:id"
+  element={<ComplaintDetailPage />}
 />
       </Routes>
     </BrowserRouter>

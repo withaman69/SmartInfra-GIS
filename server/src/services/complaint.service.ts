@@ -73,4 +73,27 @@ export class ComplaintService {
     resolved,
   };
 }
+static async assignEngineer(
+  complaintId: string,
+  engineerId: string
+) {
+  return ComplaintRepository.assignEngineer(
+    complaintId,
+    engineerId
+  );
+}
+static async getAssignedComplaints(
+  engineerId: string
+) {
+  return ComplaintRepository.getAssignedComplaints(
+    engineerId
+  );
+}
+static async resolveComplaint(
+  complaintId: string
+) {
+  return ComplaintRepository.resolveComplaint(
+    complaintId
+  );
+}
 }

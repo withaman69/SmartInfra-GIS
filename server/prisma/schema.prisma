@@ -62,32 +62,37 @@ model User {
   email         String         @unique
   passwordHash  String
   notifications Notification[]
-  role          UserRole       @default(RESEARCHER)
+  role          UserRole       @default(CITIZEN)
   auditLogs     AuditLog[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   assets          Asset[]
   assignedTickets Ticket[]
+
   complaints Complaint[]
+
+  assignedComplaints Complaint[]      @relation("AssignedComplaints")
+  maintenanceLogs    MaintenanceLog[]
 }
 
 model Asset {
-  id          String      @id @default(uuid())
-  name        String
-  assetType   String
-  description String?
-  latitude    Float
-  longitude   Float
-  status      AssetStatus @default(ACTIVE)
-  imageUrl    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  createdById String
-  createdBy   User        @relation(fields: [createdById], references: [id])
-  tickets     Ticket[]
-  healthScore Int @default(100)
-  healthHistory HealthHistory[]
+  id              String           @id @default(uuid())
+  name            String
+  assetType       String
+  description     String?
+  latitude        Float
+  longitude       Float
+  status          AssetStatus      @default(ACTIVE)
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdById     String
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  tickets         Ticket[]
+  healthScore     Int              @default(100)
+  healthHistory   HealthHistory[]
+  maintenanceLogs MaintenanceLog[]
 }
 
 model Ticket {
@@ -134,36 +139,66 @@ model Notification {
 }
 
 model HealthHistory {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   assetId     String
   healthScore Int
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
- asset Asset @relation(fields: [assetId], references: [id])
-  
+  asset Asset @relation(fields: [assetId], references: [id])
 }
 
 model Complaint {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   title       String
   description String
 
-  category    String
+  category String
 
-  status      String @default("OPEN")
+  status String @default("OPEN")
 
-  imageUrl    String?
+  imageUrl String?
 
-  latitude    Float?
-  longitude   Float?
+  latitude  Float?
+  longitude Float?
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   createdById String
-  createdBy   User @relation(fields: [createdById], references: [id])
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  assignedToId String?
+
+  assignedTo User?               @relation("AssignedComplaints", fields: [assignedToId], references: [id])
+  timeline   ComplaintTimeline[]
+}
+
+model MaintenanceLog {
+  id String @id @default(uuid())
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id])
+
+  engineerId String
+  engineer   User   @relation(fields: [engineerId], references: [id])
+
+  notes String
+
+  cost Float?
+
+  createdAt DateTime @default(now())
+}
+
+model ComplaintTimeline {
+  id String @id @default(uuid())
+
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+
+  status String
+
+  createdAt DateTime @default(now())
 }
 
 enum UserRole {
@@ -171,6 +206,7 @@ enum UserRole {
   ENGINEER
   PLANNER
   RESEARCHER
+  CITIZEN
 }
 
 enum AssetStatus {

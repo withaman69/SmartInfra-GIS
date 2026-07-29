@@ -36,7 +36,7 @@ const [logs, setLogs] =
   const [ticketDescription, setTicketDescription] = useState("");
 
   const [priority, setPriority] = useState("MEDIUM");
-
+const [maintenanceLogs, setMaintenanceLogs] = useState([]);
   useEffect(() => {
     const fetchAsset = async () => {
       try {
@@ -54,6 +54,13 @@ const [logs, setLogs] =
       } finally {
         setLoading(false);
       }
+      const logsRes = await api.get(
+  `/maintenance/asset/${id}`
+);
+
+setMaintenanceLogs(
+  logsRes.data.logs || []
+);
     };
 
     fetchAsset();
@@ -342,6 +349,46 @@ useEffect(() => {
     </div>
   )}
 
+</div>
+<div className="bg-white rounded-xl shadow-lg p-8">
+  <h2 className="text-2xl font-bold mb-6">
+    Maintenance History
+  </h2>
+
+  {maintenanceLogs.length === 0 ? (
+    <p className="text-slate-500">
+      No maintenance records found.
+    </p>
+  ) : (
+    <div className="space-y-4">
+      {maintenanceLogs.map((log: any) => (
+        <div
+          key={log.id}
+          className="border-l-4 border-orange-500 pl-4 py-3 bg-slate-50 rounded"
+        >
+          <h3 className="font-semibold">
+            {log.notes}
+          </h3>
+
+          <p className="text-sm mt-1">
+            Cost: ₹{log.cost || 0}
+          </p>
+
+          <p className="text-sm">
+            Engineer:
+            {" "}
+            {log.engineer?.name || "Unknown"}
+          </p>
+
+          <p className="text-xs text-slate-500 mt-1">
+            {new Date(
+              log.createdAt
+            ).toLocaleString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  )}
 </div>
       {/* TICKETS SECTION */}
 

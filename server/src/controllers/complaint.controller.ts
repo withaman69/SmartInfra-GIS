@@ -3,7 +3,7 @@ from "express";
 
 import { ComplaintService }
 from "../services/complaint.service";
-
+import { ComplaintTimelineRepository } from "../repositories/complaintTimeline.repository";
 export class ComplaintController {
 
   static async create(
@@ -12,18 +12,22 @@ export class ComplaintController {
   ) {
     try {
 
-      const complaint =
-        await ComplaintService.createComplaint({
-          ...req.body,
-          createdById:
-            req.user!.userId,
-        });
+  const complaint =
+  await ComplaintService.createComplaint({
+    ...req.body,
+    createdById:
+      req.user!.userId,
+  });
 
-      res.status(201).json({
-        success: true,
-        complaint,
-      });
+await ComplaintTimelineRepository.create({
+  complaintId: complaint.id,
+  status: "OPEN",
+});
 
+res.status(201).json({
+  success: true,
+  complaint,
+});
     } catch (error) {
 
       console.error(error);
@@ -157,4 +161,82 @@ export class ComplaintController {
     });
   }
 }
+
 }
+export const assignEngineer = async (
+  req: any,
+  res: any
+) => {
+  try {
+    const { id } = req.params;
+
+    const { engineerId } = req.body;
+
+    const complaint =
+      await ComplaintService.assignEngineer(
+        id,
+        engineerId
+      );
+await ComplaintTimelineRepository.create({
+  complaintId: id,
+  status: "ASSIGNED",
+});
+    return res.status(200).json({
+      success: true,
+      complaint,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+    });
+  }
+};
+export const getAssignedComplaints = async (
+  req: any,
+  res: any
+) => {
+  try {
+    const complaints =
+      await ComplaintService.getAssignedComplaints(
+        req.user.userId
+      );
+
+    return res.status(200).json({
+      success: true,
+      complaints,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+    });
+  }
+};
+export const resolveComplaint = async (
+  req: any,
+  res: any
+) => {
+  try {
+    const complaint =
+      await ComplaintService.resolveComplaint(
+        req.params.id
+      );
+await ComplaintTimelineRepository.create({
+  complaintId: req.params.id,
+  status: "RESOLVED",
+});
+    return res.status(200).json({
+      success: true,
+      complaint,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+    });
+  }
+};
