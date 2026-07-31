@@ -1,348 +1,197 @@
-# 🏗️ SmartInfra GIS Platform
+# SmartInfra GIS Platform
 
-A Full-Stack GIS-Based Infrastructure Management System built using React, TypeScript, Node.js, PostgreSQL, Prisma, and PostGIS.
+A full-stack infrastructure management system with a GIS-oriented dashboard, built with React, TypeScript, Node.js, PostgreSQL, and Prisma. It helps municipal teams track infrastructure assets, maintenance workflows, and citizen complaints from a single interface.
 
-SmartInfra helps government agencies, municipalities, and organizations manage infrastructure assets, maintenance operations, complaints, and service workflows through an interactive GIS dashboard.
-
----
-
-# 🚀 Features
-
-## 👤 Authentication & Authorization
-
-- JWT Authentication
-- Secure Login/Register
-- Role-Based Access Control
-
-### Roles
-
-- Admin
-- Engineer
-- Citizen
+**Status:** Active development — see [Roadmap](#roadmap--status) below for what's built vs. planned.
 
 ---
 
-## 🗺️ GIS Asset Management
+## Why I Built This
 
-- Create Assets
-- Update Assets
-- Delete Assets
-- View Asset Details
-- Location Tracking
-- Asset Categorization
-- Asset Status Monitoring
+I'm a Civil Engineering student, and most infrastructure-management tools I looked at either ignored the spatial dimension of asset data entirely or treated it as an afterthought. SmartInfra started as an attempt to combine real spatial querying (via PostGIS) with practical workflow tooling — maintenance tickets, complaint tracking, engineer assignment — that municipal teams actually need day to day.
 
 ---
 
-## 📊 Asset Health Monitoring
+## Screenshots
 
-- Health Score Tracking
-- Health History Timeline
-- Maintenance History
-- Asset Activity Timeline
 
----
-
-## 🛠️ Maintenance Management
-
-- Create Maintenance Tickets
-- Assign Engineers
-- Update Ticket Status
-- Ticket Tracking
-- Maintenance Logs
+<img width="1920" height="1080" alt="Screenshot 2026-07-31 185506" src="https://github.com/user-attachments/assets/feaac894-04d9-4659-87ac-ad6991f13eb2" />
+<img width="1920" height="1080" alt="Screenshot 2026-07-31 190048" src="https://github.com/user-attachments/assets/66511adb-57dc-478d-ac57-c9b75a2dfb61" />
+<img width="1920" height="1080" alt="Screenshot 2026-07-31 185613" src="https://github.com/user-attachments/assets/a35670fa-f824-46a5-a292-1c97c8ef0409" />
 
 ---
 
-## 📝 Complaint Management
+## Features
 
-- Create Complaints
-- Complaint Tracking
-- Assign Complaint to Engineer
-- Resolve Complaints
-- Complaint Timeline
+**Authentication & Access Control**
+JWT-based auth with role-based access for Admin, Engineer, and Citizen roles.
 
----
+**Asset Management**
+Create, update, and track infrastructure assets, including location, category, and status. Health-score tracking with historical timeline.
 
-## 🔔 Notifications
+**Maintenance Workflow**
+Ticket creation, engineer assignment, status tracking, and maintenance logs.
 
-- Real-Time Notification System
-- Complaint Updates
-- Ticket Updates
-- Asset Updates
+**Complaint Management**
+Citizen-submitted complaints, assignment to engineers, resolution tracking, and a full activity timeline.
 
----
+**Notifications**
+Real-time updates for complaint, ticket, and asset changes.
 
-## 📈 Dashboard
-
-### Admin Dashboard
-
-- Asset Overview
-- Complaint Overview
-- Maintenance Overview
-- System Statistics
-
-### Engineer Dashboard
-
-- Assigned Complaints
-- Assigned Tickets
-- Asset Monitoring
-
-### Citizen Dashboard
-
-- Complaint Tracking
-- Complaint Status Monitoring
+**Role-Specific Dashboards**
+Separate views for Admin (system-wide stats), Engineer (assigned work), and Citizen (their own complaints).
 
 ---
 
-# 🛠️ Tech Stack
+## Roadmap / Status
 
-## Frontend
+| Area | Status |
+|---|---|
+| Core CRUD (assets, tickets, complaints) | ✅ Built |
+| Auth & role-based access | ✅ Built |
+| Notifications | ✅ Built |
+| Real PostGIS geometry columns & spatial queries (`ST_Intersects`, `ST_DWithin`, etc.) | 🚧 In progress — currently using plain lat/lng fields, migrating to native PostGIS geometry types |
+| Interactive map view (Leaflet/MapLibre) rendering spatial query results | ✅ Built  |
+| Automated tests | 🚧 Planned |
 
-- React
-- TypeScript
-- Tailwind CSS
-- React Router DOM
-- Axios
-
-## Backend
-
-- Node.js
-- Express.js
-- TypeScript
-
-## Database
-
-- PostgreSQL
-- Prisma ORM
-- PostGIS
-
-## Authentication
-
-- JWT
-- bcrypt
+I'm being upfront here: the "GIS" in the name currently reflects the domain and long-term direction more than the current data layer. The PostGIS migration is the active next milestone.
 
 ---
 
-# 📂 Project Structure
+## Tech Stack
 
-```bash
+**Frontend:** React, TypeScript, Tailwind CSS, React Router, Axios
+**Backend:** Node.js, Express, TypeScript
+**Database:** PostgreSQL, Prisma ORM (PostGIS integration in progress — see Roadmap)
+**Auth:** JWT, bcrypt
+
+---
+
+## Project Structure
+
+```
 smartinfra-gis/
-│
 ├── client/
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   ├── routes/
-│   │   ├── api/
-│   │   └── context/
-│
+│   └── src/
+│       ├── pages/
+│       ├── components/
+│       ├── routes/
+│       ├── api/
+│       └── context/
 ├── server/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── repositories/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   ├── utils/
-│   │   └── prisma/
-│
+│   └── src/
+│       ├── controllers/
+│       ├── services/
+│       ├── repositories/
+│       ├── routes/
+│       ├── middleware/
+│       ├── utils/
+│       └── prisma/
 └── README.md
 ```
 
 ---
 
-# 🗄️ Database Models
+## Database Models
 
-## User
-
-- Authentication
-- Roles
-- Profile Management
-
-## Asset
-
-- Infrastructure Assets
-- Health Monitoring
-- GIS Coordinates
-
-## Ticket
-
-- Maintenance Workflow
-- Engineer Assignment
-
-## Complaint
-
-- Complaint Lifecycle
-- Engineer Assignment
-- Resolution Tracking
-
-## MaintenanceLog
-
-- Maintenance Records
-- Audit History
-
-## ComplaintTimeline
-
-- Complaint Activity Tracking
-
-## Notification
-
-- User Notifications
+- **User** — auth, roles, profile
+- **Asset** — infrastructure assets, health monitoring, location data
+- **Ticket** — maintenance workflow, engineer assignment
+- **Complaint** — complaint lifecycle, assignment, resolution
+- **MaintenanceLog** — maintenance records, audit history
+- **ComplaintTimeline** — complaint activity tracking
+- **Notification** — user notifications
 
 ---
 
-# ⚙️ Installation
+## Installation
 
-## Clone Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/smartinfra-gis.git
-```
+### Clone
 
 ```bash
-cd smartinfra-gis
+git clone https://github.com/withaman69/SmartInfra-GIS.git
+cd SmartInfra-GIS
 ```
 
----
-
-## Backend Setup
+### Backend
 
 ```bash
 cd server
-```
-
-Install dependencies
-
-```bash
 npm install
 ```
 
-Create .env file
+Create a `.env` file (never commit this file):
 
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/smartinfra_gis"
-
 JWT_SECRET="your_secret_key"
-
 PORT=5000
 ```
 
-Run Prisma
-
 ```bash
 npx prisma generate
-```
-
-```bash
 npx prisma db push
-```
-
-Start Server
-
-```bash
 npm run dev
 ```
 
----
-
-## Frontend Setup
+### Frontend
 
 ```bash
 cd client
-```
-
-Install dependencies
-
-```bash
 npm install
-```
-
-Start frontend
-
-```bash
 npm run dev
 ```
 
 ---
 
-# 🔐 Environment Variables
+## Main API Routes
 
-## Backend
-
-```env
-DATABASE_URL=
-JWT_SECRET=
-PORT=
+**Auth**
 ```
-
----
-
-# 📡 Main API Routes
-
-## Auth
-
-```http
 POST /api/auth/register
 POST /api/auth/login
-GET /api/auth/me
+GET  /api/auth/me
 ```
 
-## Assets
-
-```http
-GET /api/assets
-GET /api/assets/:id
-POST /api/assets
-PUT /api/assets/:id
+**Assets**
+```
+GET    /api/assets
+GET    /api/assets/:id
+POST   /api/assets
+PUT    /api/assets/:id
 DELETE /api/assets/:id
 ```
 
-## Tickets
-
-```http
-GET /api/tickets
-POST /api/tickets
+**Tickets**
+```
+GET   /api/tickets
+POST  /api/tickets
 PATCH /api/tickets/:id
 ```
 
-## Complaints
-
-```http
-GET /api/complaints
-POST /api/complaints
+**Complaints**
+```
+GET   /api/complaints
+POST  /api/complaints
 PATCH /api/complaints/:id/assign
 PATCH /api/complaints/:id/resolve
 ```
 
-## Maintenance Logs
-
-```http
-GET /api/maintenance-logs
+**Maintenance Logs**
+```
+GET  /api/maintenance-logs
 POST /api/maintenance-logs
 ```
 
 ---
 
-# 🎯 Key Highlights
+## Developer
 
-- GIS-Based Infrastructure Monitoring
-- Role-Based Access Control
-- Complaint Lifecycle Management
-- Maintenance Workflow Automation
-- Infrastructure Health Tracking
-- PostgreSQL + PostGIS Integration
-- Full TypeScript Stack
-- Production Ready Architecture
+**Aman Kumar Singh** — Civil Engineering, NIT Goa
+Building toward a PostGIS-based spatial data layer for this project as part of open-source contribution work with OSGeo (PostGIS/pgRouting).
 
 ---
 
-# 👨‍💻 Developer
+## License
 
-**Aman Kumar Singh**
-Civil Engineering Student, NIT Goa
-
----
-
-# 📄 License
-
-This project is for educational, research, and portfolio purposes.
+For educational, research, and portfolio purposes.
